@@ -800,7 +800,7 @@ function onStructChange(structType){
   // Estacas: campo (no-roof) + MV campo + bombeo D — NOT M2V
   const isBombeoD=structType==='BOMBEO_1P_D'||structType==='BOMBEO_2P_D';
   const estacasEl=document.getElementById('field-estacas');
-  const showEstacas=(!isRoof||(!isFix&&isMV&&!isMVFix)||isBombeoD)&&!isM2V;
+  const showEstacas=(!isRoof&&!isFix||(!isFix&&isMV&&!isMVFix)||isBombeoD)&&!isM2V;
   if(estacasEl) estacasEl.style.display=showEstacas?'':'none';
   if(showEstacas&&isMV) populateMvEstacas();
   if(isBombeoD) populateEstacas(structType);
