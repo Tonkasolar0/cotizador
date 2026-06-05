@@ -567,27 +567,9 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     Precios para uso interno. Se usan para calcular el total de la cotización.
   </div>
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-title">Importar lista de precios</div>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Seleccioná el archivo Excel con la lista de precios (solapa "ESTRUCTURAS"). Los precios se actualizan automáticamente.</p>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <input type="file" id="import-xlsx" accept=".xlsx" style="display:none" onchange="importarPrecios(this)">
-      <button class="btn btn-primary" onclick="document.getElementById('import-xlsx').click()">
-        ↑ Importar Excel
-      </button>
-      <span id="import-status" style="font-size:13px;color:var(--text-muted)"></span>
-    </div>
-  </div>
   <div class="card">
     <div class="card-title">Precios unitarios (USD + IVA)</div>
     <div id="prices-form"></div>
-    <div class="save-bar">
-      <span class="save-msg" id="save-msg">✓ Precios guardados correctamente</span>
-      <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="btn btn-outline btn-sm" onclick="resetPrices()">Restablecer</button>
-        <button class="btn btn-primary btn-sm" onclick="savePrices()">Guardar precios</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -2161,7 +2143,7 @@ function renderPricesForm(){
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>`;
     entries.forEach(([code,item])=>{
-      html+=`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.01" data-code="${code}" value="${(prices[code]||0).toFixed(2)}"></div></div>`;
+      html+=`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.01" data-code="${code}" value="${(prices[code]||0).toFixed(2)}" readonly style="background:var(--bg);cursor:default"></div></div>`;
     });
   });
   form.innerHTML=html;
