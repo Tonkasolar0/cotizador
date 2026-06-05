@@ -904,10 +904,19 @@ async function loadPrices(){
     const text=await res.text();
     const rows=text.split('\n');
     let updated=0;
+    function parseCSVRow(row){
+      const cols=[];let cur='',inQ=false;
+      for(let i=0;i<row.length;i++){
+        if(row[i]==='"'){inQ=!inQ;}
+        else if(row[i]===','&&!inQ){cols.push(cur);cur='';}
+        else{cur+=row[i];}
+      }
+      cols.push(cur);return cols;
+    }
     rows.forEach(row=>{
-      const cols=row.split(',');
-      const code=(cols[0]||'').trim().replace(/^"|"$/g,'');
-      const priceStr=(cols[2]||'').trim().replace(/^"|"$/g,'').replace(/\$/g,'').replace(/\s/g,'').replace('.','').replace(',','.');
+      const cols=parseCSVRow(row);
+      const code=(cols[0]||'').trim();
+      const priceStr=(cols[2]||'').trim().replace(/\$/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.');
       const price=parseFloat(priceStr);
       if(code&&!isNaN(price)&&price>0){
         prices[code]=Math.round(price*100)/100;
