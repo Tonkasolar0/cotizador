@@ -894,20 +894,20 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 
 async function saveCotizacion(datos){
   try{
-    const rpc=await fetch(`${SUPABASE_URL}/rest/v1/rpc/next_cotizacion_numero`,{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/next_cotizacion_numero`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-      body:JSON.stringify({})
+      body:JSON.stringify({
+        p_usuario:datos.usuario||'—',
+        p_estructura:datos.estructura||'',
+        p_paneles:datos.paneles||0,
+        p_mesas:datos.mesas||null,
+        p_bom:datos.bom||null
+      })
     });
-    const rpcData=await rpc.json();
-    console.log('RPC response:', rpcData);
-    const numero=typeof rpcData==='number'?rpcData:rpcData[0]?.next_cotizacion_numero||rpcData[0]?.numero||rpcData;
-    await fetch(`${SUPABASE_URL}/rest/v1/cotizaciones?numero=eq.${numero}`,{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-      body:JSON.stringify(datos)
-    });
-    return numero;
+    const numero=await res.json();
+    console.log('Cotización guardada, número:', numero);
+    return typeof numero==='number'?numero:null;
   }catch(e){
     console.warn('No se pudo guardar cotización:',e.message);
     return null;
