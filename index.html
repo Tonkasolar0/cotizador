@@ -907,7 +907,40 @@ function updatePerfilPreview(){
   document.getElementById('prev-mail').textContent=perfil.mail||'—';
 }
 // ===== STORAGE — PRICES =====
-function loadPrices(){try{const s=localStorage.getItem('tonka_prices_v3');if(s)prices={...DEFAULT_PRICES,...JSON.parse(s)};}catch(e){}}
+const PRICES_SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTW_StUuYinClGhbdmh2oAgoTJEsf0vTJvXea43JsOxjnJ8l9B75cs-rjGMatjL6A/pub?gid=1568028079&single=true&output=csv';
+
+function loadPricesFromStorage(){
+  try{const s=localStorage.getItem('tonka_prices_v3');if(s)prices={...DEFAULT_PRICES,...JSON.parse(s)};}catch(e){}
+}
+
+async function loadPrices(){
+  loadPricesFromStorage();
+  renderPricesForm();
+  try{
+    const res=await fetch(PRICES_SHEET_URL);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const rows=text.split('\n');
+    let updated=0;
+    rows.forEach(row=>{
+      const cols=row.split(',');
+      const code=(cols[0]||'').trim().replace(/^"|"$/g,'');
+      const priceStr=(cols[2]||'').trim().replace(/^"|"$/g,'').replace(',','.');
+      const price=parseFloat(priceStr);
+      if(code&&!isNaN(price)&&price>0){
+        prices[code]=Math.round(price*100)/100;
+        updated++;
+      }
+    });
+    if(updated>0){
+      try{localStorage.setItem('tonka_prices_v3',JSON.stringify(prices));}catch(e){}
+      renderPricesForm();
+      console.log(`Precios actualizados desde Google Sheets (${updated} items)`);
+    }
+  }catch(e){
+    console.warn('No se pudo cargar precios desde Google Sheets, usando caché local:',e.message);
+  }
+}
 function savePrices(){
   document.querySelectorAll('.price-input').forEach(i=>{prices[i.dataset.code]=parseFloat(i.value)||0;});
   try{localStorage.setItem('tonka_prices_v3',JSON.stringify(prices));}catch(e){}
@@ -2157,7 +2190,7 @@ function clearHighlight(){
   });
 }
 
-function init(){loadPrices();loadPerfil();renderPricesForm();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();}
+function init(){loadPrices();loadPerfil();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();}
 init();
 </script>
 </body>
