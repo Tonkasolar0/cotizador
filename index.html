@@ -925,7 +925,7 @@ async function loadPrices(){
     rows.forEach(row=>{
       const cols=row.split(',');
       const code=(cols[0]||'').trim().replace(/^"|"$/g,'');
-      const priceStr=(cols[2]||'').trim().replace(/^"|"$/g,'').replace(',','.');
+      const priceStr=(cols[2]||'').trim().replace(/^"|"$/g,'').replace(/\$/g,'').replace(/\s/g,'').replace('.','').replace(',','.');
       const price=parseFloat(priceStr);
       if(code&&!isNaN(price)&&price>0){
         prices[code]=Math.round(price*100)/100;
