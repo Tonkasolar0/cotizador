@@ -900,6 +900,7 @@ async function saveCotizacion(datos){
       body:JSON.stringify({})
     });
     const rpcData=await rpc.json();
+    console.log('RPC response:', rpcData);
     const numero=typeof rpcData==='number'?rpcData:rpcData[0]?.next_cotizacion_numero||rpcData[0]?.numero||rpcData;
     await fetch(`${SUPABASE_URL}/rest/v1/cotizaciones?numero=eq.${numero}`,{
       method:'PATCH',
