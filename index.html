@@ -399,7 +399,10 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   </div>
   <div class="result-header">
     <div>
-      <div class="result-title" id="result-title">—</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="result-title" id="result-title">—</div>
+        <div id="cotizacion-numero" style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:4px;color:#fff"></div>
+      </div>
       <div class="result-sub" id="result-sub">—</div>
     </div>
     <div class="result-actions">
@@ -886,6 +889,29 @@ function updatePerfilPreview(){
   document.getElementById('prev-mail').textContent=perfil.mail||'—';
 }
 // ===== STORAGE — PRICES =====
+const SUPABASE_URL='https://vzjnbnetxntnxbrufnsb.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6am5ibmV0eG50bnhicnVmbnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2Nzc0MjgsImV4cCI6MjA5NjI1MzQyOH0.iypMIx5pg1w4YRKUALq9nuaj41NqKZ3mbhUbec-2n5s';
+
+async function saveCotizacion(datos){
+  try{
+    const rpc=await fetch(`${SUPABASE_URL}/rest/v1/rpc/next_cotizacion_numero`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify({})
+    });
+    const numero=await rpc.json();
+    await fetch(`${SUPABASE_URL}/rest/v1/cotizaciones?numero=eq.${numero}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify(datos)
+    });
+    return numero;
+  }catch(e){
+    console.warn('No se pudo guardar cotización:',e.message);
+    return null;
+  }
+}
+
 const PRICES_SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTW_StUuYinClGhbdmh2oAgoTJEsf0vTJvXea43JsOxjnJ8l9B75cs-rjGMatjL6A/pub?gid=1568028079&single=true&output=csv';
 
 function loadPricesFromStorage(){
@@ -1472,6 +1498,10 @@ function calcular(){
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
     showInner('materiales');
     renderBOM(bom);
+    saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
+      const el=document.getElementById('cotizacion-numero');
+      if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+    });
     return;
   }
 
@@ -1626,6 +1656,11 @@ function buildResult(cfg){
   document.getElementById('pdf-layout-container').classList.toggle('pdf-hide', !layoutOk);
   const msg = document.getElementById('pdf-layout-msg');
   if(!layoutOk) msg.classList.add('print-show'); else msg.classList.remove('print-show');
+  const bomData=buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows);
+  saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
+    const el=document.getElementById('cotizacion-numero');
+    if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+  });
 }
 
 // ===== BOM =====
