@@ -408,6 +408,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     <div class="result-actions">
       <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="showPage('cotizador')">← Volver</button>
       <button class="btn btn-yellow btn-sm" onclick="window.print()">⬇ Exportar PDF</button>
+      <button class="btn btn-yellow btn-sm" onclick="exportPedidoExcel()">⬇ Crear Excel (pedido)</button>
     </div>
   </div>
   <div class="inner-tabs">
@@ -455,7 +456,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
       <table class="bom-table">
         <thead><tr>
           <th>Código</th><th>Descripción</th>
-          <th style="text-align:center">Cant.</th>
+          <th style="text-align:center">Cant x mesa</th>
+          <th style="text-align:center">Cant total</th>
           <th style="text-align:right">Precio unit.</th>
           <th style="text-align:right">Subtotal</th>
         </tr></thead>
@@ -865,6 +867,7 @@ function populateEstacas(structType){
 const DEFAULT_PRICES={};Object.keys(ITEMS).forEach(k=>DEFAULT_PRICES[k]=0);
 
 let prices={...DEFAULT_PRICES},currentResult=null,selectedConfigKey=null;
+let lastBOMData=null,lastBOMCantMesas=1;
 
 // ===== PERFIL =====
 let perfil={nombre:'',tel:'',mail:''};
@@ -920,6 +923,24 @@ function loadPricesFromStorage(){
   try{const s=localStorage.getItem('tonka_prices_v3');if(s)prices={...DEFAULT_PRICES,...JSON.parse(s)};}catch(e){}
 }
 
+// Parsea un precio en formato argentino y lo trunca a 3 decimales (igual que el
+// sistema de gestión LATIKA: trunca, NO redondea). Acepta valores como
+// "4,599950302", "$ 4,60", "1.234,56" o un número simple.
+function parsePrecio(raw){
+  if(raw==null) return NaN;
+  let s=String(raw).trim().replace(/\$/g,'').replace(/\s/g,'').replace(/"/g,'');
+  if(!s) return NaN;
+  // Si tiene punto y coma, el punto es separador de miles y la coma es decimal.
+  // Si tiene solo coma, la coma es decimal. Si tiene solo punto, lo dejamos como decimal.
+  if(s.indexOf(',')>=0){
+    s=s.replace(/\./g,'').replace(',','.');
+  }
+  const n=parseFloat(s);
+  if(isNaN(n)) return NaN;
+  // Truncar a 3 decimales (no redondear), como exige LATIKA para importar pedidos
+  return Math.trunc(n*1000)/1000;
+}
+
 async function loadPrices(){
   loadPricesFromStorage();
   renderPricesForm();
@@ -941,10 +962,9 @@ async function loadPrices(){
     rows.forEach(row=>{
       const cols=parseCSVRow(row);
       const code=(cols[0]||'').trim();
-      const priceStr=(cols[2]||'').trim().replace(/\$/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.');
-      const price=parseFloat(priceStr);
+      const price=parsePrecio(cols[2]);
       if(code&&!isNaN(price)&&price>0){
-        prices[code]=Math.round(price*100)/100;
+        prices[code]=price;
         updated++;
       }
     });
@@ -961,7 +981,7 @@ function savePrices(){
   document.querySelectorAll('.price-input').forEach(i=>{prices[i.dataset.code]=parseFloat(i.value)||0;});
   try{localStorage.setItem('tonka_prices_v3',JSON.stringify(prices));}catch(e){}
   const m=document.getElementById('save-msg');m.classList.add('show');setTimeout(()=>m.classList.remove('show'),2500);
-  if(currentResult&&selectedConfigKey){const cfg=findConfig(selectedConfigKey);if(cfg)renderBOM(buildBOM(cfg,currentResult.structType,currentResult.panelQty,currentResult.panelFrame,currentResult.panelW,currentResult.rows));}
+  if(currentResult&&selectedConfigKey){const cfg=findConfig(selectedConfigKey);if(cfg)renderBOM(buildBOM(cfg,currentResult.structType,currentResult.panelQty,currentResult.panelFrame,currentResult.panelW,currentResult.rows),parseInt(document.getElementById('cant-mesas')?.value)||1);}
 }
 function importarPrecios(input){
   const file=input.files[0];
@@ -986,7 +1006,7 @@ function importarPrecios(input){
         if(!code||isNaN(price)||price<=0) return;
         // Update if exists in ITEMS, regardless of whether it's in prices
         if(ITEMS[code]||prices.hasOwnProperty(code)){
-          prices[code]=Math.round(price*100)/100;
+          prices[code]=Math.trunc(price*1000)/1000;
           updated++;
         }
       });
@@ -1648,7 +1668,7 @@ function buildResult(cfg){
   document.getElementById('pdf-footer-vendor').textContent=vendorName;
   document.getElementById('pdf-footer-contact').textContent=contactParts.join(' · ');
 
-  renderBOM(buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows));
+  renderBOM(buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows),parseInt(document.getElementById('cant-mesas')?.value)||1);
   // For PDF: hide layout if too many panels (>40 total)
   const totalPanelsForLayout = structType==='T54' ? panelQty*2 : panelQty;
   const layoutOk = totalPanelsForLayout <= 40;
@@ -1730,6 +1750,7 @@ function buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows){
   const estacaSur=currentResult&&currentResult.estacaSur;
   if(estacaNorte)add(estacaNorte,cfg.nPatas);
   if(estacaSur)add(estacaSur,cfg.nPatas);
+  // buildBOM devuelve cantidades POR MESA. renderBOM escala por cantidad de mesas.
   Object.keys(bom).forEach(k=>{if(bom[k]<=0)delete bom[k];});
   return bom;
 }
@@ -1828,17 +1849,10 @@ function updateDiscount(){
   const el=document.getElementById('bom-total-val');
   if(el) el.textContent=lastBOMTotal>0?fmt(total):'Sin precios cargados';
   // Parque total (only if came from planificador)
+  // Bloque "Parque completo" desactivado: el BOM ya escala por cantidad de mesas,
+  // así que el TOTAL ya representa el parque completo.
   const parqueEl=document.getElementById('bom-parque-total');
-  const parqueVal=document.getElementById('bom-parque-val');
-  const parqueMesas=document.getElementById('bom-parque-mesas');
-  if(parqueEl&&planMesas>1&&total>0){
-    parqueEl.style.display='flex';
-    if(parqueMesas) parqueMesas.textContent=planMesas;
-    const totalParque=total*planMesas;
-    if(parqueVal) parqueVal.textContent='USD '+totalParque.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  } else if(parqueEl){
-    parqueEl.style.display='none';
-  }
+  if(parqueEl) parqueEl.style.display='none';
   const line=document.getElementById('bom-discount-line');
   const pct=document.getElementById('bom-discount-pct');
   const subtotalLine=document.getElementById('bom-subtotal-line');
@@ -1873,17 +1887,22 @@ function getProjectWatts(){
   }
 }
 
-function renderBOM(bom){
+function renderBOM(bom,cantMesas){
+  // cantMesas: cantidad de mesas para estructuras a piso. Si no se pasa (techo/bombeo/MV
+  // ya vienen con cantidades totales), se asume 1 y las dos columnas muestran lo mismo.
+  cantMesas=parseInt(cantMesas)||1;
+  lastBOMData=bom; lastBOMCantMesas=cantMesas;
   const tbody=document.getElementById('bom-body');
   tbody.innerHTML='';
   let total=0;
   const fmt=n=>n>0?'USD '+n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
-  Object.entries(bom).forEach(([code,qty])=>{
-    if(!qty)return;
+  Object.entries(bom).forEach(([code,qtyMesa])=>{
+    if(!qtyMesa)return;
     const item=ITEMS[code]||{desc:code};
-    const up=prices[code]||0,sub=up*qty;total+=sub;
+    const qtyTotal=qtyMesa*cantMesas;
+    const up=prices[code]||0,sub=up*qtyTotal;total+=sub;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><span class="code">${code}</span></td><td style="font-size:13px">${item.desc}</td><td style="text-align:center;font-weight:700">${qty}</td><td style="text-align:right;color:var(--text-muted);font-size:13px">${fmt(up)}</td><td style="text-align:right;font-weight:700">${fmt(sub)}</td>`;
+    tr.innerHTML=`<td><span class="code">${code}</span></td><td style="font-size:13px">${item.desc}</td><td style="text-align:center;color:var(--text-muted)">${qtyMesa}</td><td style="text-align:center;font-weight:700">${qtyTotal}</td><td style="text-align:right;color:var(--text-muted);font-size:13px">${fmt(up)}</td><td style="text-align:right;font-weight:700">${fmt(sub)}</td>`;
     tbody.appendChild(tr);
   });
   lastBOMTotal=total;
@@ -1894,6 +1913,54 @@ function renderBOM(bom){
   if(discEl) discEl.value=0;
   document.getElementById('bom-total-val').textContent=total>0?fmt(total):'Sin precios cargados';
   updateDiscount();
+}
+
+function exportPedidoExcel(){
+  if(!lastBOMData||!Object.keys(lastBOMData).length){
+    alert('Primero generá una cotización con materiales.');
+    return;
+  }
+  const cantMesas=lastBOMCantMesas||1;
+  // Descuento global del cotizador (en %), convertido a fracción 0-1 para la columna DESCUENTO
+  const discPct=parseFloat(document.getElementById('bom-discount')?.value)||0;
+  const descFrac=discPct/100;
+  // Encabezados (formato del sistema de gestión)
+  const aoa=[['CODIGO','CANTIDAD','PRECIO DE LISTA EN USD','DESCUENTO','PRECIO FINAL','NOTA DEL ITEM','PRECIO TOTAL FINAL']];
+  const codes=Object.keys(lastBOMData);
+  codes.forEach((code,i)=>{
+    const qtyTotal=(lastBOMData[code]||0)*cantMesas;
+    if(qtyTotal<=0)return;
+    const precioLista=prices[code]||0; // si no hay precio cargado, va 0 (se actualizará al cargar precio)
+    const r=aoa.length+1; // fila real en la hoja (1-indexed)
+    aoa.push([
+      code,
+      qtyTotal,
+      precioLista,
+      descFrac,
+      {f:`C${r}*(1-D${r})`},
+      {f:`IF(D${r}<>0, "Descuento acordado: " & D${r}*100 & "%", IF(E${r}<>C${r}, "Precio acordado", ""))`},
+      {f:`E${r}*B${r}`}
+    ]);
+  });
+  // Fila de total: SUM de la columna G
+  const lastDataRow=aoa.length; // última fila con datos (1-indexed)
+  if(lastDataRow>1){
+    const sumRow=lastDataRow+1;
+    const blank=['','','','','','',{f:`SUM(G2:G${lastDataRow})`}];
+    aoa.push(blank);
+  }
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:9},{wch:10},{wch:20},{wch:11},{wch:13},{wch:30},{wch:19}];
+  // Nombre de hoja y archivo con fecha dd-mm-aaaa
+  const d=new Date();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  const fecha=`${dd}-${mm}-${yyyy}`;
+  const titulo=(document.getElementById('result-title')?.textContent||'Pedido').trim().replace(/[\\/:*?"<>|]/g,'_').slice(0,60);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,fecha);
+  XLSX.writeFile(wb,`Pedido_${titulo}_${fecha}.xlsx`);
 }
 
 // ===== LAYOUT SVG =====
@@ -2186,7 +2253,7 @@ function renderPricesForm(){
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>`;
     entries.forEach(([code,item])=>{
-      html+=`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.01" data-code="${code}" value="${(prices[code]||0).toFixed(2)}" readonly style="background:var(--bg);cursor:default"></div></div>`;
+      html+=`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.001" data-code="${code}" value="${(prices[code]||0).toFixed(3)}" readonly style="background:var(--bg);cursor:default"></div></div>`;
     });
   });
   form.innerHTML=html;
