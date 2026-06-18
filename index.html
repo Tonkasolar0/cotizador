@@ -640,10 +640,10 @@ const ITEMS={
   'SEG5162': {desc:'Conj. clamp central estribo 60-80 LC',cat:'clamp',group:'mp70_mp80'},
   'SEG5313': {desc:'Conj. clamp lateral estribo 60-80 panel 30 LC',cat:'clamp',group:'mp70_mp80'},
   'SEG5314': {desc:'Conj. clamp lateral estribo 60-80 panel 35 LC',cat:'clamp',group:'mp70_mp80'},
-  'SER5351': {desc:'Conj. clamp lateral estribo 60-80 panel 33 LC',cat:'clamp',group:'mp70_mp80'},
+  'SEG5351': {desc:'Conj. clamp lateral estribo 60-80 panel 33 LC',cat:'clamp',group:'mp70_mp80'},
 };
 const LATERAL_BY_FRAME={'30':'SEG5541','33':'SEG5542','35':'SEG5531'};
-const LATERAL_MP80_BY_FRAME={'30':'SEG5313','33':'SER5351','35':'SEG5314'};
+const LATERAL_MP80_BY_FRAME={'30':'SEG5313','33':'SEG5351','35':'SEG5314'};
 const PATA_BY_STRUCT={MPC:'SEVV5430',T54:'SE2V5429',MP70:'SEVV5074',MP70F:'SEPV5089',MP80:'SEVV5074',MP80F:'SEPV5089'};
 const RIENDA_BY_STRUCT={MPC:'SER5516',T54:'SE2V5538',MP70:'SER5546',MP70F:'SER5546',MP80:'SER5546',MP80F:'SER5546'};
 
@@ -920,7 +920,7 @@ async function saveCotizacion(datos){
 const PRICES_SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTW_StUuYinClGhbdmh2oAgoTJEsf0vTJvXea43JsOxjnJ8l9B75cs-rjGMatjL6A/pub?gid=1568028079&single=true&output=csv';
 
 function loadPricesFromStorage(){
-  try{const s=localStorage.getItem('tonka_prices_v3');if(s)prices={...DEFAULT_PRICES,...JSON.parse(s)};}catch(e){}
+  try{const s=localStorage.getItem('tonka_prices_v4');if(s)prices={...DEFAULT_PRICES,...JSON.parse(s)};}catch(e){}
 }
 
 // Parsea un precio en formato argentino y lo trunca a 3 decimales (igual que el
@@ -969,7 +969,7 @@ async function loadPrices(){
       }
     });
     if(updated>0){
-      try{localStorage.setItem('tonka_prices_v3',JSON.stringify(prices));}catch(e){}
+      try{localStorage.setItem('tonka_prices_v4',JSON.stringify(prices));}catch(e){}
       renderPricesForm();
       console.log(`Precios actualizados desde Google Sheets (${updated} items)`);
     }
@@ -979,7 +979,7 @@ async function loadPrices(){
 }
 function savePrices(){
   document.querySelectorAll('.price-input').forEach(i=>{prices[i.dataset.code]=parseFloat(i.value)||0;});
-  try{localStorage.setItem('tonka_prices_v3',JSON.stringify(prices));}catch(e){}
+  try{localStorage.setItem('tonka_prices_v4',JSON.stringify(prices));}catch(e){}
   const m=document.getElementById('save-msg');m.classList.add('show');setTimeout(()=>m.classList.remove('show'),2500);
   if(currentResult&&selectedConfigKey){const cfg=findConfig(selectedConfigKey);if(cfg)renderBOM(buildBOM(cfg,currentResult.structType,currentResult.panelQty,currentResult.panelFrame,currentResult.panelW,currentResult.rows),parseInt(document.getElementById('cant-mesas')?.value)||1);}
 }
@@ -1023,7 +1023,7 @@ function importarPrecios(input){
   reader.readAsArrayBuffer(file);
 }
 
-function resetPrices(){if(!confirm('¿Restablecer todos los precios a cero?'))return;prices={...DEFAULT_PRICES};localStorage.removeItem('tonka_prices_v3');renderPricesForm();}
+function resetPrices(){if(!confirm('¿Restablecer todos los precios a cero?'))return;prices={...DEFAULT_PRICES};localStorage.removeItem('tonka_prices_v4');renderPricesForm();}
 
 // ===== NAV =====
 let planMesas=0;
