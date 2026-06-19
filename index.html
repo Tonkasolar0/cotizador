@@ -141,6 +141,12 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   #pdf-layout-container.pdf-hide{display:none!important}
   #pdf-layout-msg{display:none!important}
   #pdf-layout-msg.print-show{display:block!important}
+  #pdf-render-container.print-show{display:flex!important;gap:10px;justify-content:center;align-items:flex-start;margin:8px 0}
+  #pdf-render-container.print-show img{max-height:160px;max-width:48%;object-fit:contain;border:1px solid #ddd;border-radius:4px}
+  #pdf-render-container.print-show.single img{max-width:80%}
+  body.has-render #pdf-layout-container{display:none!important}
+  body.has-render #pdf-layout-msg{display:none!important}
+  #screen-render{display:none!important}
   .pdf-header{display:flex!important}
   .pdf-footer{display:block!important;margin-top:6px}
   .legend{margin-top:4px;gap:6px}
@@ -437,8 +443,13 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
       <div id="pdf-layout-msg" style="display:none;padding:16px;text-align:center;font-size:12px;color:var(--text-muted);background:var(--bg);border-radius:6px;margin:8px 0">
         Layout no disponible en PDF para mesas de más de 40 paneles. Visualizalo en el cotizador.
       </div>
+      <div id="pdf-render-container" style="display:none"></div>
       <div id="pdf-layout-container" class="layout-container">
         <svg id="layout-svg" style="display:block;width:100%"></svg>
+      </div>
+      <div id="screen-render" style="display:none;margin-top:14px">
+        <div class="card-title" style="margin-bottom:8px">Render de la estructura</div>
+        <div id="screen-render-imgs" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:flex-start"></div>
       </div>
       <div class="legend">
         <div class="legend-item legend-hover" data-layer="pata" onmouseenter="highlightLayer('pata')" onmouseleave="clearHighlight()">
@@ -601,6 +612,25 @@ const BOMBEO_TYPES=new Set(['BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P
 const MV_TYPES=new Set(['MV_30D','MV_40D','MV_30F','MV_40F','MV_50F']);
 const MV_FIX_TYPES=new Set(['MV_30F','MV_40F','MV_50F']);
 const M2V_KIT_TYPES=new Set(['M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134']);
+
+// Render fijo por tipo de estructura. Archivos en la carpeta /renders del repo.
+// Cada tipo apunta a uno o dos archivos (techos: lateral + central).
+const RENDERS={
+  MPC:['MPC.jpg'],
+  MP70:['mp70-80 drill.jpg'], MP80:['mp70-80 drill.jpg'],
+  MP70F:['mp70-80 fix.jpg'],  MP80F:['mp70-80 fix.jpg'],
+  T54:['2V T54.jpg'],
+  M42_2V_F:['2V M52.jpg'], MT40_2V_F:['2V M52.jpg'],
+  M52_2V_F_1303:['2V M52.jpg'], M52_2V_F_1134:['2V M52.jpg'],
+  BOMBEO_1P_D:['Kit 1 pan drill.jpg'], BOMBEO_2P_D:['Kit 2 pan drill.jpg'],
+  BOMBEO_1P_F:['Kit 1 pan fix.jpg'],   BOMBEO_2P_F:['Kit 2 pan fix.jpg'],
+  MV_30D:['1v drill.jpg'], MV_40D:['1v drill.jpg'],
+  MV_30F:['1v fix.jpg'], MV_40F:['1v fix.jpg'], MV_50F:['1v fix.jpg'],
+  PLANOR:['PLANOR.53.jpg'],
+  U45:['U45 LATERAL.jpg','U45 CENTRAL.jpg'],
+  TRAPEZOIDAL:['TRAPEZOIDAL LATERAL.jpg','TRAPEZOIDAL CENTRAL.jpg'],
+  ACANALADA:['ACANALADA LATERAL.jpg','ACANALADA CENTRAL.jpg']
+};
 
 // MP70/MP80 geometry constants
 const MP_PATA_SPACING=2008; // mm between pata centers
@@ -1690,6 +1720,8 @@ function buildResult(cfg){
   document.getElementById('pdf-layout-container').classList.toggle('pdf-hide', !layoutOk);
   const msg = document.getElementById('pdf-layout-msg');
   if(!layoutOk) msg.classList.add('print-show'); else msg.classList.remove('print-show');
+  // Render fijo de la estructura para el PDF (reemplaza el layout)
+  setRenderForPDF(structType);
   const bomData=buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows);
   saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
     const el=document.getElementById('cotizacion-numero');
@@ -1973,6 +2005,35 @@ function exportPedidoExcel(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,fecha);
   XLSX.writeFile(wb,`Pedido_${titulo}_${fecha}.xlsx`);
+}
+
+// ===== RENDER FIJO PARA PDF =====
+function setRenderForPDF(structType){
+  const cont=document.getElementById('pdf-render-container');
+  const screen=document.getElementById('screen-render');
+  const screenImgs=document.getElementById('screen-render-imgs');
+  const files=RENDERS[structType];
+  cont.innerHTML='';
+  screenImgs.innerHTML='';
+  cont.classList.remove('print-show','single');
+  document.body.classList.remove('has-render');
+  screen.style.display='none';
+  if(!files||!files.length) return; // sin render: queda el layout como estaba
+  files.forEach(f=>{
+    const src='renders/'+encodeURIComponent(f);
+    const img=document.createElement('img');
+    img.src=src; img.alt=structType;
+    cont.appendChild(img);
+    // preview en pantalla para el vendedor
+    const s=document.createElement('img');
+    s.src=src; s.alt=structType;
+    s.style.cssText='max-height:200px;max-width:'+(files.length>1?'48%':'80%')+';object-fit:contain;border:1px solid var(--border);border-radius:6px';
+    screenImgs.appendChild(s);
+  });
+  if(files.length===1) cont.classList.add('single');
+  cont.classList.add('print-show');
+  document.body.classList.add('has-render');
+  screen.style.display='block';
 }
 
 // ===== LAYOUT SVG =====
