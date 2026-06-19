@@ -1772,7 +1772,7 @@ function buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows){
     const norm=cfg.unions.filter(u=>!u.interferes).length;
     const interf=cfg.unions.filter(u=>u.interferes).length;
     const centralCode=(structType==='MP70'||structType==='MP70F')?'SEG5532':'SEG5162';
-    const interfCode=(structType==='MP70'||structType==='MP70F')?'SEG5510':'SEG5162'; // both use same for interference in MP80 (placa tuerca)
+    const interfCode='SEG5510'; // interferencia con pata usa placa tuerca C40 en MP70 y MP80
     add(centralCode, norm*clampMult);
     if(interf>0) add(interfCode, interf*clampMult);
   } else {
