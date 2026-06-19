@@ -148,6 +148,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   body.has-render #pdf-layout-msg{display:none!important}
   #screen-render{display:none!important}
   .pdf-header{display:flex!important}
+  .pdf-ficha{display:block!important;margin:0 0 10px 0}
   .pdf-footer{display:block!important;margin-top:6px}
   .legend{margin-top:4px;gap:6px}
   .legend-item{font-size:8px}
@@ -164,6 +165,12 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .pdf-header-sub{font-size:10px;color:#6B7280;margin-top:3px}
 .pdf-header-date{text-align:right;font-size:10px;color:#6B7280}
 .pdf-header-date strong{display:block;font-size:12px;font-weight:700;color:#1A365D}
+.pdf-ficha{display:none}
+.pdf-ficha-title{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#1A365D;margin-bottom:6px}
+.pdf-ficha-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 16px;border:1px solid #ddd;border-radius:4px;padding:8px 12px;background:#FAFBFC}
+.pdf-ficha-item{font-size:9px;color:#374151;padding:2px 0;border-bottom:1px solid #EEF1F4}
+.pdf-ficha-item b{color:#1A365D;font-weight:700}
+.pdf-ficha-item .lbl{color:#6B7280;text-transform:uppercase;font-size:8px;letter-spacing:.5px;display:block}
 .pdf-footer{display:none;border-top:2px solid #1A365D;padding-top:10px;margin-top:14px}
 .pdf-footer-inner{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
 .pdf-footer-vendor{font-weight:700;color:#1A365D;font-size:11px}
@@ -415,6 +422,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     </div>
     <div class="pdf-header-date" id="pdf-date-block"></div>
   </div>
+  <div class="pdf-ficha" id="pdf-ficha"></div>
   <div class="result-header">
     <div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -1557,6 +1565,9 @@ function calcular(){
     // Hide layout tab for MV, bombeo and M2V
     const tabLayout=document.getElementById('tab-layout');
     if(tabLayout) tabLayout.style.display=(isMV||isBombeo||isM2V)?'none':'';
+    // Render fijo y ficha de configuración para el PDF
+    setRenderForPDF(structType);
+    setFichaForPDF(structType, structName, displayPanels);
     showPage('resultado');
   const navRes=document.getElementById('nav-resultado');
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
@@ -1722,6 +1733,8 @@ function buildResult(cfg){
   if(!layoutOk) msg.classList.add('print-show'); else msg.classList.remove('print-show');
   // Render fijo de la estructura para el PDF (reemplaza el layout)
   setRenderForPDF(structType);
+  // Ficha de configuración para el PDF
+  setFichaForPDF(structType, structName, displayPanels);
   const bomData=buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows);
   saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
     const el=document.getElementById('cotizacion-numero');
@@ -2005,6 +2018,52 @@ function exportPedidoExcel(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,fecha);
   XLSX.writeFile(wb,`Pedido_${titulo}_${fecha}.xlsx`);
+}
+
+// ===== FICHA DE CONFIGURACIÓN PARA PDF =====
+function setFichaForPDF(structType, structName, displayPanels){
+  const cont=document.getElementById('pdf-ficha');
+  if(!cont) return;
+  const r=currentResult||{};
+  const isRoof=ROOF_TYPES.has(structType);
+  const isBombeo=BOMBEO_TYPES.has(structType);
+  const isMV=MV_TYPES.has(structType);
+  const isM2V=M2V_KIT_TYPES.has(structType);
+  // Mesas: 1 para bombeo; el resto lee el campo
+  const mesas=isBombeo?1:(parseInt(document.getElementById('cant-mesas')?.value)||1);
+  // Wp por panel: techo/M2V usan panel-watt; campo/MV usan panel-watt-campo
+  const watt=(isRoof&&!isM2V)
+    ? (parseInt(document.getElementById('panel-watt')?.value)||0)
+    : (parseInt(document.getElementById('panel-watt-campo')?.value)||0);
+  const numEl=document.getElementById('cotizacion-numero');
+  const num=(numEl&&numEl.textContent.trim())?numEl.textContent.trim():'—';
+  const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const cliente=r.projectName||'—';
+  // Paneles por mesa y total
+  const porMesa = (isBombeo||isMV) ? '—' : (r.panelQty!=null?String(r.panelQty):'—');
+  const totalPan = r.panelTotal!=null?String(r.panelTotal):(displayPanels||'—');
+  // Dimensiones del panel (solo cuando existen)
+  const dims = (r.panelW&&r.panelH) ? `${r.panelW} × ${r.panelH} mm` : '—';
+  // Marco
+  const marco = (isBombeo||isMV||isM2V||!r.panelFrame) ? '—' : `${r.panelFrame} mm`;
+  // Potencia total estimada
+  const kwp = (watt>0 && r.panelTotal>0) ? `${(watt*r.panelTotal/1000).toFixed(2)} kWp` : '—';
+  const item=(lbl,val)=>`<div class="pdf-ficha-item"><span class="lbl">${lbl}</span><b>${val}</b></div>`;
+  cont.innerHTML=
+    `<div class="pdf-ficha-title">Ficha de configuración</div>`+
+    `<div class="pdf-ficha-grid">`+
+      item('N° cotización', num)+
+      item('Fecha', fecha)+
+      item('Cliente / proyecto', cliente)+
+      item('Estructura', structName||structType)+
+      item('Cant. de paneles', totalPan)+
+      item('Paneles por mesa', porMesa)+
+      item('Mesas', isBombeo?'—':String(mesas))+
+      item('Dimensiones panel', dims)+
+      item('Marco', marco)+
+      item('Potencia por panel', watt>0?`${watt} Wp`:'—')+
+      item('Potencia total', kwp)+
+    `</div>`;
 }
 
 // ===== RENDER FIJO PARA PDF =====
