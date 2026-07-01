@@ -1578,6 +1578,7 @@ function calcular(){
     saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
       const el=document.getElementById('cotizacion-numero');
       if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+      setFichaForPDF(structType, structName, displayPanels);
     });
     return;
   }
@@ -1743,6 +1744,7 @@ function buildResult(cfg){
   saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
     const el=document.getElementById('cotizacion-numero');
     if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+    setFichaForPDF(structType, structName, displayPanels);
   });
 }
 
