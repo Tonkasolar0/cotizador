@@ -2431,7 +2431,11 @@ function fitPrintToOnePage(){
   el.style.zoom='';
   el.style.width='190mm'; // ancho real de impresión: A4 (210mm) - márgenes (10mm c/u)
   void el.offsetHeight; // forzar reflow con ese ancho
-  const availableHeightPx=mmToPx(277)*0.96; // alto de página (297mm - márgenes) con margen de seguridad
+  // Alto de página (297mm - márgenes de 10mm c/u = 277mm), reservando además ~15mm
+  // por si el navegador de quien imprime tiene activados "Encabezados y pies de página"
+  // (fecha/título arriba, URL/N° de página abajo), que no podemos detectar ni desactivar
+  // desde la página. Más un 3% extra de margen de seguridad general.
+  const availableHeightPx=mmToPx(277-15)*0.97;
   const naturalHeight=el.scrollHeight;
   if(naturalHeight>availableHeightPx){
     el.style.zoom=availableHeightPx/naturalHeight;
