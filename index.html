@@ -273,7 +273,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
               <option value="MP80F">MP 80 14 30 20 F (Fix)</option>
             </optgroup>
             <optgroup label="Estructuras 2V — a piso">
-              <option value="T54">T54 2V 12 30 25 D</option>
+              <option value="T54" disabled>T54 2V 12 30 25 D (Próximamente)</option>
               <option value="M42_2V_F">SE2V5455 — M42 2V 14 30 29 F (18p x 1134)</option>
               <option value="MT40_2V_F">SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)</option>
               <option value="M52_2V_F_1303">SE2V5486 — M52 2V 14 30 33 F (18p x 1303)</option>
@@ -1578,7 +1578,6 @@ function calcular(){
     saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
       const el=document.getElementById('cotizacion-numero');
       if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
-      setFichaForPDF(structType, structName, displayPanels);
     });
     return;
   }
@@ -1744,7 +1743,6 @@ function buildResult(cfg){
   saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
     const el=document.getElementById('cotizacion-numero');
     if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
-    setFichaForPDF(structType, structName, displayPanels);
   });
 }
 
