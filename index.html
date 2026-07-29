@@ -776,6 +776,17 @@ const ESTACAS_MPC=[
   {code:'SEE5605',label:'L1063 mm'},
   {code:'SEE5606',label:'L1277 mm'},
 ];
+// Pata norte MPC: modelo único (confirmado)
+const ESTACAS_MPC_NORTE=[
+  {code:'SEE5604',label:'L797 mm'},
+];
+// Pata sur MPC: PROVISORIO — usa la lista vieja de 4 largos hasta tener los 2 códigos definitivos de sur
+const ESTACAS_MPC_SUR=ESTACAS_MPC;
+// Mapa central: qué lista de estacas usa cada posición (norte/sur) por tipo de estructura.
+// Si un tipo no aparece acá, populateEstacas() usa la misma lista "opts" para ambos lados (comportamiento original).
+const ESTACAS_BY_STRUCT={
+  MPC:{norte:ESTACAS_MPC_NORTE, sur:ESTACAS_MPC_SUR},
+};
 const ESTACAS_T54=[
   {code:'X5920',label:'L1300 mm'},
   {code:'X5923',label:'L1500 mm'},
@@ -901,10 +912,18 @@ function populateMvEstacas(){
 function populateEstacas(structType){
   if(structType==="MP70F"||structType==="MP80F") return;
   const isBombeoD=structType==='BOMBEO_1P_D'||structType==='BOMBEO_2P_D';
-  const opts=structType==='MPC'?ESTACAS_MPC:structType==='T54'?ESTACAS_T54:isBombeoD?ESTACAS_TUBO33:ESTACAS_MP;
+  const fallbackOpts=structType==='MPC'?ESTACAS_MPC:structType==='T54'?ESTACAS_T54:isBombeoD?ESTACAS_TUBO33:ESTACAS_MP;
+  // Si el tipo de estructura tiene listas distintas por posición (ej: MPC), se usan esas.
+  // Si no, se usa la misma lista "fallbackOpts" para norte y sur, como antes.
+  const perPosition=ESTACAS_BY_STRUCT[structType];
+  const optsByPos={
+    'estaca-norte': perPosition ? perPosition.norte : fallbackOpts,
+    'estaca-sur':   perPosition ? perPosition.sur   : fallbackOpts,
+  };
   ['estaca-norte','estaca-sur'].forEach(id=>{
     const sel=document.getElementById(id);
     const prev=sel.value;
+    const opts=optsByPos[id];
     sel.innerHTML='<option value="">— Sin especificar —</option>';
     opts.forEach(o=>{sel.innerHTML+=`<option value="${o.code}"${o.code===prev?' selected':''}>${o.label}</option>`;});
   });
