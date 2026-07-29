@@ -651,34 +651,31 @@ const MP_CORREA_LENS=[2000,2200,2400,2600]; // available correa extremo lengths
 
 const ITEMS={
   // MPC / T54
-  'SEVV5430':{desc:'Conjunto pata MPC 14 30 25 D',cat:'estructura',group:'mpc_t54'},
-  'SE2V5429':{desc:'Conjunto pata T54 2V 12 30 25 D',cat:'estructura',group:'mpc_t54'},
-  'SE2V5534':{desc:'Conj. correa T2V-MPC C70-350MPa L2698',cat:'correa',group:'mpc_t54'},
-  'SE2V5535':{desc:'Conj. extensor correa T2V-MPC C70-350MPa L1100',cat:'correa',group:'mpc_t54'},
-  'SEG5532': {desc:'Conj. clamp central estribo 70 LC',cat:'clamp',group:'mpc_t54'},
-  'SEG5510': {desc:'Conj. clamp central con placa tuerca perfil C40',cat:'clamp',group:'mpc_t54'},
-  'SEG5541': {desc:'Conj. clamp lateral estribo 70 panel 30 LC',cat:'clamp',group:'mpc_t54'},
-  'SEG5542': {desc:'Conj. clamp lateral estribo 70 panel 33 LC',cat:'clamp',group:'mpc_t54'},
-  'SEG5531': {desc:'Conj. clamp lateral estribo 70 panel 35 LC',cat:'clamp',group:'mpc_t54'},
-  'SER5516': {desc:'Conjunto rienda sur MPC L2699',cat:'estructura',group:'mpc_t54'},
-  'SE2V5538':{desc:'Conj. rienda sur T54 2V',cat:'estructura',group:'mpc_t54'},
+  'SEVV5430':{desc:'Conjunto pata MPC 14 30 25 D',cat:'estructura',sub:'pata',group:'mpc_t54'},
+  'SE2V5429':{desc:'Conjunto pata T54 2V 12 30 25 D',cat:'estructura',sub:'pata',group:'mpc_t54'},
+  'SE2V5534':{desc:'Conj. correa T2V-MPC C70-350MPa L2698',cat:'correa',sub:'correa',group:'mpc_t54'},
+  'SE2V5535':{desc:'Conj. extensor correa T2V-MPC C70-350MPa L1100',cat:'correa',sub:'correa',group:'mpc_t54'},
+  'SEG5532': {desc:'Conj. clamp central estribo 70 LC',cat:'clamp',sub:'clamp',group:'mpc_t54'},
+  'SEG5510': {desc:'Conj. clamp central con placa tuerca perfil C40',cat:'clamp',sub:'clamp',group:'mpc_t54'},
+  'SEG5541': {desc:'Conj. clamp lateral estribo 70 panel 30 LC',cat:'clamp',sub:'clamp',group:'mpc_t54'},
+  'SEG5542': {desc:'Conj. clamp lateral estribo 70 panel 33 LC',cat:'clamp',sub:'clamp',group:'mpc_t54'},
+  'SEG5531': {desc:'Conj. clamp lateral estribo 70 panel 35 LC',cat:'clamp',sub:'clamp',group:'mpc_t54'},
+  'SER5516': {desc:'Conjunto rienda sur MPC L2699',cat:'estructura',sub:'rienda',group:'mpc_t54'},
+  'SE2V5538':{desc:'Conj. rienda sur T54 2V',cat:'estructura',sub:'rienda',group:'mpc_t54'},
   // Estacas Ø33,7 (MPC/MP)
-  'SEE5603':{desc:'Conj. estaca 33_7 M12 L636 GIC',cat:'estaca',group:'mpc_t54'},
-  'SEE5604':{desc:'Conj. estaca MPC - T33.7 H110 L797',cat:'estaca',group:'mpc_t54'},
-  'SEE5605':{desc:'Conj. estaca 33_7 M12 L1063 GIC',cat:'estaca',group:'mpc_t54'},
-  'SEE5606':{desc:'Conj. estaca 33_7 M12 L1277 GIC',cat:'estaca',group:'mpc_t54'},
+  'SEE5604':{desc:'Conj. estaca MPC - T33.7 H110 L797',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
   // Estacas Ø42,4 pata sur MPC (H160, confirmado — plano SEE5664 traía error de tipeo H110, corregido a H160)
-  'SEE5664':{desc:'Conj. estaca MPC - T42.4 H160 L1063',cat:'estaca',group:'mpc_t54'},
-  'SEE5665':{desc:'Conj. estaca MPC - T42.4 H160 L1277',cat:'estaca',group:'mpc_t54'},
+  'SEE5664':{desc:'Conj. estaca MPC - T42.4 H160 L1063',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
+  'SEE5665':{desc:'Conj. estaca MPC - T42.4 H160 L1277',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
   // Estacas Ø42,4 (T54)
-  'X5920':{desc:'Conj. estaca tubo 42.4 largo 1300 mm',cat:'estaca',group:'mpc_t54'},
-  'X5921':{desc:'Conj. estaca tubo 42.4 largo 1700 mm',cat:'estaca',group:'mpc_t54'},
-  'X5923':{desc:'Conj. estaca tubo 42.4 largo 1500 mm',cat:'estaca',group:'mpc_t54'},
+  'X5920':{desc:'Conj. estaca tubo 42.4 largo 1300 mm',cat:'estaca',sub:'estaca_t54',group:'mpc_t54'},
+  'X5921':{desc:'Conj. estaca tubo 42.4 largo 1700 mm',cat:'estaca',sub:'estaca_t54',group:'mpc_t54'},
+  'X5923':{desc:'Conj. estaca tubo 42.4 largo 1500 mm',cat:'estaca',sub:'estaca_t54',group:'mpc_t54'},
   // Estructuras 2V kit fijo
-  'SE2V5455': {desc:'Estructura M42 2V 14 30 29 F (18p x 1134)',cat:'estructura',group:'mpc_t54'},
-  'SE2V5455T':{desc:'Estructura MT40 2V 14 30 29 F (18p x 1134)',cat:'estructura',group:'mpc_t54'},
-  'SE2V5486': {desc:'Estructura M52 2V 14 30 33 F (18p x 1303)',cat:'estructura',group:'mpc_t54'},
-  'SE2V5557': {desc:'Estructura M52 2V 14 30 33 F (18p x 1134)',cat:'estructura',group:'mpc_t54'},
+  'SE2V5455': {desc:'Estructura M42 2V 14 30 29 F (18p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
+  'SE2V5455T':{desc:'Estructura MT40 2V 14 30 29 F (18p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
+  'SE2V5486': {desc:'Estructura M52 2V 14 30 33 F (18p x 1303)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
+  'SE2V5557': {desc:'Estructura M52 2V 14 30 33 F (18p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
   // MP70 specific
   'SEVV5074':{desc:'Conj. pata MP 14 30 20 D',cat:'estructura',group:'mp70_mp80'},
   'SEPV5089':{desc:'Conj. pata MP 14 30 20 F',cat:'estructura',group:'mp70_mp80'},
@@ -773,12 +770,6 @@ const MP70_CORREA_BY_LEN={2000:'SEVV5587',2200:'SEVV5588',2400:'SEVV5589',2600:'
 const MP80_CORREA_BY_LEN={2000:'SEVV5286',2200:'SEVV5287',2400:'SEVV5288',2600:'SEVV5289'};
 
 // Estaca options per structure type
-const ESTACAS_MPC=[
-  {code:'SEE5603',label:'L636 mm'},
-  {code:'SEE5604',label:'L797 mm'},
-  {code:'SEE5605',label:'L1063 mm'},
-  {code:'SEE5606',label:'L1277 mm'},
-];
 // Pata norte MPC: modelo único (confirmado)
 const ESTACAS_MPC_NORTE=[
   {code:'SEE5604',label:'L797 mm'},
@@ -918,7 +909,7 @@ function populateMvEstacas(){
 function populateEstacas(structType){
   if(structType==="MP70F"||structType==="MP80F") return;
   const isBombeoD=structType==='BOMBEO_1P_D'||structType==='BOMBEO_2P_D';
-  const fallbackOpts=structType==='MPC'?ESTACAS_MPC:structType==='T54'?ESTACAS_T54:isBombeoD?ESTACAS_TUBO33:ESTACAS_MP;
+  const fallbackOpts=structType==='T54'?ESTACAS_T54:isBombeoD?ESTACAS_TUBO33:ESTACAS_MP;
   // Si el tipo de estructura tiene listas distintas por posición (ej: MPC), se usan esas.
   // Si no, se usa la misma lista "fallbackOpts" para norte y sur, como antes.
   const perPosition=ESTACAS_BY_STRUCT[structType];
@@ -2405,6 +2396,12 @@ function renderPricesForm(){
     {key:'bombeo',    label:'Bombeo',                                    color:'#FDF4FF', textColor:'#6B21A8'},
     {key:'fijaciones',label:'Fijaciones de Techo',                       color:'#FFF1F2', textColor:'#9F1239'},
   ];
+  // Orden y etiquetas de subgrupos (solo aplica a los items que tengan campo "sub"; el resto sigue sin subagrupar)
+  const SUB_ORDER=['pata','correa','clamp','rienda','estaca_mpc','estaca_t54','kit_fijo'];
+  const SUB_LABELS={
+    pata:'Patas', correa:'Correas', clamp:'Clamps / Estribos', rienda:'Riendas sur',
+    estaca_mpc:'Estacas MPC', estaca_t54:'Estacas T54', kit_fijo:'Estructuras 2V kit fijo (M42 / MT40 / M52)',
+  };
   let html='';
   GROUPS.forEach(g=>{
     const entries=Object.entries(ITEMS).filter(([,item])=>item.group===g.key);
@@ -2413,9 +2410,19 @@ function renderPricesForm(){
       <span style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:4px;background:${g.color};color:${g.textColor};white-space:nowrap">${g.label}</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>`;
-    entries.forEach(([code,item])=>{
-      html+=`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.001" data-code="${code}" value="${(prices[code]||0).toFixed(3)}" readonly style="background:var(--bg);cursor:default"></div></div>`;
-    });
+    const row=([code,item])=>`<div class="price-row"><div><div class="price-code">${code}</div><div class="price-name">${item.desc}</div></div><div class="price-input-wrap"><span class="price-currency">USD</span><input class="price-input" type="number" min="0" step="0.001" data-code="${code}" value="${(prices[code]||0).toFixed(3)}" readonly style="background:var(--bg);cursor:default"></div></div>`;
+    if(entries.some(([,item])=>item.sub)){
+      // Subagrupado: recorre en el orden fijo SUB_ORDER; cualquier item sin "sub" queda al final, sin subtítulo.
+      SUB_ORDER.forEach(subKey=>{
+        const subEntries=entries.filter(([,item])=>item.sub===subKey);
+        if(!subEntries.length) return;
+        html+=`<div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:12px 0 4px 4px;text-transform:uppercase;letter-spacing:0.5px">${SUB_LABELS[subKey]||subKey}</div>`;
+        subEntries.forEach(e=>{html+=row(e);});
+      });
+      entries.filter(([,item])=>!item.sub).forEach(e=>{html+=row(e);});
+    } else {
+      entries.forEach(e=>{html+=row(e);});
+    }
   });
   form.innerHTML=html;
 }
