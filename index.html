@@ -692,13 +692,13 @@ const ITEMS={
   'SEVV5286':{desc:'Conj. correa cent C80 L2000 MPL 14 XX 20 D',cat:'correa',group:'mp70_mp80'},
   'SEVV5288':{desc:'Conj. correa ext C80 L2400 MPL 14 XX 20 D',cat:'correa',group:'mp70_mp80'},
   'SEVV5287':{desc:'Conj. correa ext C80 L2200 MPL 14 XX 20 D',cat:'correa',group:'mp70_mp80'},
-  'SEG5162': {desc:'Conj. clamp central estribo 60-80 LC',cat:'clamp',group:'mp70_mp80'},
-  'SEG5313': {desc:'Conj. clamp lateral estribo 60-80 panel 30 LC',cat:'clamp',group:'mp70_mp80'},
-  'SEG5314': {desc:'Conj. clamp lateral estribo 60-80 panel 35 LC',cat:'clamp',group:'mp70_mp80'},
-  'SEG5351': {desc:'Conj. clamp lateral estribo 60-80 panel 33 LC',cat:'clamp',group:'mp70_mp80'},
+  'SEG5655': {desc:'Conj. clamp central estribo 80 LC',cat:'clamp',group:'mp70_mp80'},
+  'SEG5656': {desc:'Conj. clamp lateral estribo 80 panel 30 LC',cat:'clamp',group:'mp70_mp80'},
+  'SEG5658': {desc:'Conj. clamp lateral estribo 80 panel 35 LC',cat:'clamp',group:'mp70_mp80'},
+  'SEG5657': {desc:'Conj. clamp lateral estribo 80 panel 33 LC',cat:'clamp',group:'mp70_mp80'},
 };
 const LATERAL_BY_FRAME={'30':'SEG5541','33':'SEG5542','35':'SEG5531'};
-const LATERAL_MP80_BY_FRAME={'30':'SEG5313','33':'SEG5351','35':'SEG5314'};
+const LATERAL_MP80_BY_FRAME={'30':'SEG5656','33':'SEG5657','35':'SEG5658'};
 const PATA_BY_STRUCT={MPC:'SEVV5430',T54:'SE2V5429',MP70:'SEVV5074',MP70F:'SEPV5089',MP80:'SEVV5074',MP80F:'SEPV5089'};
 const RIENDA_BY_STRUCT={MPC:'SER5516',T54:'SE2V5538',MP70:'SER5546',MP70F:'SER5546',MP80:'SER5546',MP80F:'SER5546'};
 
@@ -1813,7 +1813,7 @@ function buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows){
     const clampMult=2; // 2 correa lines
     const norm=cfg.unions.filter(u=>!u.interferes).length;
     const interf=cfg.unions.filter(u=>u.interferes).length;
-    const centralCode=(structType==='MP70'||structType==='MP70F')?'SEG5532':'SEG5162';
+    const centralCode=(structType==='MP70'||structType==='MP70F')?'SEG5532':'SEG5655';
     const interfCode='SEG5510'; // interferencia con pata usa placa tuerca C40 en MP70 y MP80
     add(centralCode, norm*clampMult);
     if(interf>0) add(interfCode, interf*clampMult);
