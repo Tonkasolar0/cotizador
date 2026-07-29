@@ -667,6 +667,9 @@ const ITEMS={
   'SEE5604':{desc:'Conj. estaca MPC - T33.7 H110 L797',cat:'estaca',group:'mpc_t54'},
   'SEE5605':{desc:'Conj. estaca 33_7 M12 L1063 GIC',cat:'estaca',group:'mpc_t54'},
   'SEE5606':{desc:'Conj. estaca 33_7 M12 L1277 GIC',cat:'estaca',group:'mpc_t54'},
+  // Estacas Ø42,4 pata sur MPC (H160, confirmado — plano SEE5664 traía error de tipeo H110, corregido a H160)
+  'SEE5664':{desc:'Conj. estaca MPC - T42.4 H160 L1063',cat:'estaca',group:'mpc_t54'},
+  'SEE5665':{desc:'Conj. estaca MPC - T42.4 H160 L1277',cat:'estaca',group:'mpc_t54'},
   // Estacas Ø42,4 (T54)
   'X5920':{desc:'Conj. estaca tubo 42.4 largo 1300 mm',cat:'estaca',group:'mpc_t54'},
   'X5921':{desc:'Conj. estaca tubo 42.4 largo 1700 mm',cat:'estaca',group:'mpc_t54'},
@@ -780,8 +783,11 @@ const ESTACAS_MPC=[
 const ESTACAS_MPC_NORTE=[
   {code:'SEE5604',label:'L797 mm'},
 ];
-// Pata sur MPC: PROVISORIO — usa la lista vieja de 4 largos hasta tener los 2 códigos definitivos de sur
-const ESTACAS_MPC_SUR=ESTACAS_MPC;
+// Pata sur MPC: modelo Ø42,4 H160, dos largos (confirmado)
+const ESTACAS_MPC_SUR=[
+  {code:'SEE5664',label:'L1063 mm'},
+  {code:'SEE5665',label:'L1277 mm'},
+];
 // Mapa central: qué lista de estacas usa cada posición (norte/sur) por tipo de estructura.
 // Si un tipo no aparece acá, populateEstacas() usa la misma lista "opts" para ambos lados (comportamiento original).
 const ESTACAS_BY_STRUCT={
