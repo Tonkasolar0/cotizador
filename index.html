@@ -1638,7 +1638,10 @@ function calcular(){
     renderBOM(bom);
     saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
       const el=document.getElementById('cotizacion-numero');
-      if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+      const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
+      if(el) el.textContent=numTxt;
+      const fichaEl=document.getElementById('ficha-numero-cotizacion');
+      if(fichaEl) fichaEl.textContent=numTxt||'—';
     });
     return;
   }
@@ -1803,7 +1806,10 @@ function buildResult(cfg){
   const bomData=buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows);
   saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
     const el=document.getElementById('cotizacion-numero');
-    if(el) el.textContent=num?`#${String(num).padStart(4,'0')}`:'' ;
+    const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
+    if(el) el.textContent=numTxt;
+    const fichaEl=document.getElementById('ficha-numero-cotizacion');
+    if(fichaEl) fichaEl.textContent=numTxt||'—';
   });
 }
 
@@ -2113,11 +2119,11 @@ function setFichaForPDF(structType, structName, displayPanels){
   const marco = (isBombeo||isMV||isM2V||!r.panelFrame) ? '—' : `${r.panelFrame} mm`;
   // Potencia total estimada
   const kwp = (watt>0 && r.panelTotal>0) ? `${(watt*r.panelTotal/1000).toFixed(2)} kWp` : '—';
-  const item=(lbl,val)=>`<div class="pdf-ficha-item"><span class="lbl">${lbl}</span><b>${val}</b></div>`;
+  const item=(lbl,val,id)=>`<div class="pdf-ficha-item"><span class="lbl">${lbl}</span><b${id?` id="${id}"`:''}>${val}</b></div>`;
   cont.innerHTML=
     `<div class="pdf-ficha-title">Ficha de configuración</div>`+
     `<div class="pdf-ficha-grid">`+
-      item('N° cotización', num)+
+      item('N° cotización', num, 'ficha-numero-cotizacion')+
       item('Fecha', fecha)+
       item('Cliente / proyecto', cliente)+
       item('Estructura', structName||structType)+
