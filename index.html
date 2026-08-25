@@ -49,6 +49,24 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .field label{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.5px;text-transform:uppercase}
 .field input,.field select{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:500;color:var(--text);border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;background:var(--white);transition:border-color .15s;outline:none}
 .field input:focus,.field select:focus{border-color:var(--blue)}
+.cs-wrap{position:relative}
+.cs-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'Montserrat',sans-serif;border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;background:var(--white);cursor:pointer;text-align:left}
+.cs-trigger:focus,.cs-trigger.open{outline:none;border-color:var(--blue)}
+.cs-trigger-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+.cs-main{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-sub{font-size:11px;font-weight:500;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-arrow{font-size:12px;color:var(--text-muted);flex-shrink:0;transition:transform .15s}
+.cs-trigger.open .cs-arrow{transform:rotate(180deg)}
+.cs-menu{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--white);border:1.5px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:340px;overflow-y:auto;z-index:50}
+.cs-menu.open{display:block}
+.cs-group-label{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:0.5px;text-transform:uppercase;padding:10px 12px 4px}
+.cs-option{padding:8px 12px;cursor:pointer}
+.cs-option:hover{background:var(--bg)}
+.cs-option.selected{background:#EAF3FB}
+.cs-option.disabled{cursor:not-allowed;opacity:.45}
+.cs-option.disabled:hover{background:transparent}
+.cs-option .cs-main{font-size:13px}
+.cs-option .cs-sub{font-size:11px}
 .btn{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:10px 20px;border-radius:6px;border:none;cursor:pointer;transition:all .15s}
 .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#005f9e}
 .btn-yellow{background:var(--yellow);color:var(--dark-blue)}.btn-yellow:hover{background:#e6c800}
@@ -270,44 +288,54 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
         <div id="datos-body">
         <div class="field" style="margin-bottom:14px">
           <label>Tipo de estructura</label>
-          <select id="struct-type" onchange="onStructChange(this.value)">
-            <optgroup label="Multipanel — a piso">
-              <option value="MPC">MPC 14 30 25 D</option>
-              <option value="MP70">MP 70 14 30 20 D</option>
-              <option value="MP70F">MP 70 14 30 20 F (Fix)</option>
-              <option value="MP80">MP 80 14 30 20 D</option>
-              <option value="MP80F">MP 80 14 30 20 F (Fix)</option>
-            </optgroup>
-            <optgroup label="Estructuras 2V — a piso">
-              <option value="T54" disabled>T54 2V 12 30 25 D (Próximamente)</option>
-              <option value="M42_2V_F">SE2V5455 — M42 2V 14 30 29 F (18p x 1134)</option>
-              <option value="MT40_2V_F">SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)</option>
-              <option value="M52_2V_F_1303">SE2V5486 — M52 2V 14 30 33 F (18p x 1303)</option>
-              <option value="M52_2V_F_1134">SE2V5557 — M52 2V 14 30 33 F (18p x 1134)</option>
-              <option value="M52_2V_F_1303_N">SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303) [nuevo]</option>
-              <option value="M52_2V_F_1134_N">SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134) [nuevo]</option>
-              <option value="M52_2V_F_1134_N20">SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134) [nuevo]</option>
-            </optgroup>
-            <optgroup label="Bombeo — a piso">
-              <option value="BOMBEO_1P_D">SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
-              <option value="BOMBEO_2P_D">SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
-              <option value="BOMBEO_1P_F">SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
-              <option value="BOMBEO_2P_F">SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
-            </optgroup>
-            <optgroup label="Monopanel Vertical — a piso">
-              <option value="MV_30D">1V 14 30 D</option>
-              <option value="MV_40D">1V 14 40 D</option>
-              <option value="MV_30F">1V 14 30 F</option>
-              <option value="MV_40F">1V 14 40 F</option>
-              <option value="MV_50F">1V 14 50 F</option>
-            </optgroup>
-            <optgroup label="Fijaciones de techo">
-              <option value="ACANALADA">Chapa Acanalada (Easy Grip)</option>
-              <option value="TRAPEZOIDAL">Chapa Trapezoidal T101</option>
-              <option value="U45">Techo U45</option>
-              <option value="PLANOR">Planor 2</option>
-            </optgroup>
-          </select>
+          <div class="cs-wrap" id="struct-type-wrap">
+            <select id="struct-type" style="display:none">
+              <optgroup label="Multipanel — a piso">
+                <option value="MPC">Multipanel MPC — Drill — 30° · MPC 14 30 25 D</option>
+                <option value="MP70">Multipanel C70 — Drill — 30° · MP 70 14 30 20 D</option>
+                <option value="MP70F">Multipanel C70 — Fix — 30° · MP 70 14 30 20 F (Fix)</option>
+                <option value="MP80">Multipanel C80 — Drill — 30° · MP 80 14 30 20 D</option>
+                <option value="MP80F">Multipanel C80 — Fix — 30° · MP 80 14 30 20 F (Fix)</option>
+              </optgroup>
+              <optgroup label="Estructuras 2V — a piso">
+                <option value="T54" disabled>2V T54 — Drill — 30° (Próximamente) · T54 2V 12 30 25 D</option>
+                <option value="M42_2V_F">2V M42 — 18 paneles — 1134 mm — Fix — 30° · SE2V5455 — M42 2V 14 30 29 F (18p x 1134)</option>
+                <option value="MT40_2V_F">2V MT40 — 18 paneles — 1134 mm — Fix — 30° · SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)</option>
+                <option value="M52_2V_F_1303">2V M52 — 18 paneles — 1303 mm — Fix — 30° · SE2V5486 — M52 2V 14 30 33 F (18p x 1303)</option>
+                <option value="M52_2V_F_1134">2V M52 — 18 paneles — 1134 mm — Fix — 30° · SE2V5557 — M52 2V 14 30 33 F (18p x 1134)</option>
+                <option value="M52_2V_F_1303_N">2V M52-2 — 18 paneles — 1303 mm — Fix — 30° (Nuevo) · SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303)</option>
+                <option value="M52_2V_F_1134_N">2V M52-2 — 18 paneles — 1134 mm — Fix — 30° (Nuevo) · SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134)</option>
+                <option value="M52_2V_F_1134_N20">2V M52-2 — 20 paneles — 1134 mm — Fix — 30° (Nuevo) · SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134)</option>
+              </optgroup>
+              <optgroup label="Bombeo — a piso">
+                <option value="BOMBEO_1P_D">Kit Bombeo — 1 panel — Drill — 30° · SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
+                <option value="BOMBEO_2P_D">Kit Bombeo — 2 paneles — Drill — 30° · SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
+                <option value="BOMBEO_1P_F">Kit Bombeo — 1 panel — Fix — 30° · SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
+                <option value="BOMBEO_2P_F">Kit Bombeo — 2 paneles — Fix — 30° · SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
+              </optgroup>
+              <optgroup label="Monopanel Vertical — a piso">
+                <option value="MV_30D">Monopanel Vertical — Drill — 30° · 1V 14 30 D</option>
+                <option value="MV_40D">Monopanel Vertical — Drill — 40° · 1V 14 40 D</option>
+                <option value="MV_30F">Monopanel Vertical — Fix — 30° · 1V 14 30 F</option>
+                <option value="MV_40F">Monopanel Vertical — Fix — 40° · 1V 14 40 F</option>
+                <option value="MV_50F">Monopanel Vertical — Fix — 50° · 1V 14 50 F</option>
+              </optgroup>
+              <optgroup label="Fijaciones de techo">
+                <option value="ACANALADA">Chapa Acanalada (Easy Grip)</option>
+                <option value="TRAPEZOIDAL">Chapa Trapezoidal T101</option>
+                <option value="U45">Techo U45</option>
+                <option value="PLANOR">Planor 2</option>
+              </optgroup>
+            </select>
+            <button type="button" class="cs-trigger" id="struct-type-trigger">
+              <span class="cs-trigger-text">
+                <span class="cs-main" id="struct-type-main"></span>
+                <span class="cs-sub" id="struct-type-sub"></span>
+              </span>
+              <span class="cs-arrow">▾</span>
+            </button>
+            <div class="cs-menu" id="struct-type-menu"></div>
+          </div>
         </div>
         <div class="form-grid" id="field-panel-qty" style="margin-bottom:14px">
           <div class="field">
@@ -2467,7 +2495,65 @@ function clearHighlight(){
   });
 }
 
-function init(){loadPrices();loadPerfil();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();}
+// ===== Combo custom de dos líneas (nombre coloquial + técnico) para Tipo de estructura =====
+function buildStructMenu(){
+  const sel=document.getElementById('struct-type');
+  const menu=document.getElementById('struct-type-menu');
+  if(!sel||!menu) return;
+  let html='';
+  Array.from(sel.children).forEach(group=>{
+    if(group.tagName!=='OPTGROUP') return;
+    html+=`<div class="cs-group-label">${group.label}</div>`;
+    Array.from(group.children).forEach(opt=>{
+      const parts=opt.textContent.split(' · ');
+      const main=parts[0];
+      const sub=parts[1]||'';
+      const disabled=opt.disabled;
+      html+=`<div class="cs-option${disabled?' disabled':''}" data-value="${opt.value}" onclick="${disabled?'':`selectStructOption('${opt.value}')`}">`
+          +`<div class="cs-main">${main}</div>`
+          +(sub?`<div class="cs-sub">${sub}</div>`:'')
+          +`</div>`;
+    });
+  });
+  menu.innerHTML=html;
+}
+function updateStructTriggerDisplay(){
+  const sel=document.getElementById('struct-type');
+  const opt=sel.options[sel.selectedIndex];
+  if(!opt) return;
+  const parts=opt.textContent.split(' · ');
+  document.getElementById('struct-type-main').textContent=parts[0];
+  document.getElementById('struct-type-sub').textContent=parts[1]||'';
+  document.querySelectorAll('#struct-type-menu .cs-option').forEach(el=>{
+    el.classList.toggle('selected',el.dataset.value===sel.value);
+  });
+}
+function selectStructOption(value){
+  const sel=document.getElementById('struct-type');
+  sel.value=value;
+  updateStructTriggerDisplay();
+  closeStructMenu();
+  onStructChange(value);
+}
+function toggleStructMenu(){
+  const menu=document.getElementById('struct-type-menu');
+  const trigger=document.getElementById('struct-type-trigger');
+  const isOpen=menu.classList.contains('open');
+  if(isOpen) closeStructMenu(); else { menu.classList.add('open'); trigger.classList.add('open'); }
+}
+function closeStructMenu(){
+  document.getElementById('struct-type-menu').classList.remove('open');
+  document.getElementById('struct-type-trigger').classList.remove('open');
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('struct-type-wrap');
+  if(wrap&&!wrap.contains(e.target)) closeStructMenu();
+});
+document.getElementById('struct-type-trigger')?.addEventListener('click',toggleStructMenu);
+buildStructMenu();
+updateStructTriggerDisplay();
+
+function init(){loadPrices();loadPerfil();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();updateStructTriggerDisplay();}
 init();
 
 // ===== AJUSTE AUTOMÁTICO PARA QUE LA FICHA ENTRE SIEMPRE EN UNA SOLA PÁGINA =====
