@@ -286,6 +286,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
               <option value="M52_2V_F_1134">SE2V5557 — M52 2V 14 30 33 F (18p x 1134)</option>
               <option value="M52_2V_F_1303_N">SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303) [nuevo]</option>
               <option value="M52_2V_F_1134_N">SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134) [nuevo]</option>
+              <option value="M52_2V_F_1134_N20">SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134) [nuevo]</option>
             </optgroup>
             <optgroup label="Bombeo — a piso">
               <option value="BOMBEO_1P_D">SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
@@ -624,12 +625,12 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 const PATA_SPACING=2500,SOLAPADO=198,EXTENSOR_LEN=1100;
 const EXTENSOR_POSITIONS=[150,300,450,600,750,900];
 const PANEL_GAP=20,BORDER_MIN=40,INTERF_HALF=99;
-const STRUCT_ROWS={MPC:1,T54:2,MP70:1,MP70F:1,MP80:1,MP80F:1,ACANALADA:1,TRAPEZOIDAL:1,U45:1,PLANOR:1,BOMBEO_1P_D:1,BOMBEO_2P_D:1,BOMBEO_1P_F:1,BOMBEO_2P_F:1,MV_30D:1,MV_40D:1,MV_30F:1,MV_40F:1,MV_50F:1,M42_2V_F:2,MT40_2V_F:2,M52_2V_F_1303:2,M52_2V_F_1134:2,M52_2V_F_1303_N:2,M52_2V_F_1134_N:2};
-const ROOF_TYPES=new Set(['ACANALADA','TRAPEZOIDAL','U45','PLANOR','BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P_F','MV_30D','MV_40D','MV_30F','MV_40F','MV_50F','M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134','M52_2V_F_1303_N','M52_2V_F_1134_N']);
+const STRUCT_ROWS={MPC:1,T54:2,MP70:1,MP70F:1,MP80:1,MP80F:1,ACANALADA:1,TRAPEZOIDAL:1,U45:1,PLANOR:1,BOMBEO_1P_D:1,BOMBEO_2P_D:1,BOMBEO_1P_F:1,BOMBEO_2P_F:1,MV_30D:1,MV_40D:1,MV_30F:1,MV_40F:1,MV_50F:1,M42_2V_F:2,MT40_2V_F:2,M52_2V_F_1303:2,M52_2V_F_1134:2,M52_2V_F_1303_N:2,M52_2V_F_1134_N:2,M52_2V_F_1134_N20:2};
+const ROOF_TYPES=new Set(['ACANALADA','TRAPEZOIDAL','U45','PLANOR','BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P_F','MV_30D','MV_40D','MV_30F','MV_40F','MV_50F','M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134','M52_2V_F_1303_N','M52_2V_F_1134_N','M52_2V_F_1134_N20']);
 const BOMBEO_TYPES=new Set(['BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P_F']);
 const MV_TYPES=new Set(['MV_30D','MV_40D','MV_30F','MV_40F','MV_50F']);
 const MV_FIX_TYPES=new Set(['MV_30F','MV_40F','MV_50F']);
-const M2V_KIT_TYPES=new Set(['M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134','M52_2V_F_1303_N','M52_2V_F_1134_N']);
+const M2V_KIT_TYPES=new Set(['M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134','M52_2V_F_1303_N','M52_2V_F_1134_N','M52_2V_F_1134_N20']);
 
 // Render fijo por tipo de estructura. Archivos en la carpeta /renders del repo.
 // Cada tipo apunta a uno o dos archivos (techos: lateral + central).
@@ -640,7 +641,7 @@ const RENDERS={
   T54:['2V T54.jpg'],
   M42_2V_F:['2V M52.jpg'], MT40_2V_F:['2V M52.jpg'],
   M52_2V_F_1303:['2V M52.jpg'], M52_2V_F_1134:['2V M52.jpg'],
-  M52_2V_F_1303_N:['2V M52.jpg'], M52_2V_F_1134_N:['2V M52.jpg'],
+  M52_2V_F_1303_N:['2V M52.jpg'], M52_2V_F_1134_N:['2V M52.jpg'], M52_2V_F_1134_N20:['2V M52.jpg'],
   BOMBEO_1P_D:['Kit 1 pan drill.jpg'], BOMBEO_2P_D:['Kit 2 pan drill.jpg'],
   BOMBEO_1P_F:['Kit 1 pan fix.jpg'],   BOMBEO_2P_F:['Kit 2 pan fix.jpg'],
   MV_30D:['1v drill.jpg'], MV_40D:['1v drill.jpg'],
@@ -687,6 +688,7 @@ const ITEMS={
   'SE2V5557': {desc:'Estructura M52 2V 14 30 33 F (18p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
   'SE2V5641': {desc:'Estructura M52-2 2V 12 30 33 F (18p x 1303)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
   'SE2V5650': {desc:'Estructura M52-2 2V 12 30 33 F (18p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
+  'SE2V5677': {desc:'Estructura M52-2 2V 12 30 33 F (20p x 1134)',cat:'estructura',sub:'kit_fijo',group:'mpc_t54'},
   // MP70 specific
   'SEVV5074':{desc:'Conj. pata MP 14 30 20 D',cat:'estructura',group:'mp70_mp80'},
   'SEPV5089':{desc:'Conj. pata MP 14 30 20 F',cat:'estructura',group:'mp70_mp80'},
@@ -733,6 +735,7 @@ const M2V_ITEMS={
   M52_2V_F_1134:{kitCode:'SE2V5557',  panelsPorMesa:18},
   M52_2V_F_1303_N:{kitCode:'SE2V5641',panelsPorMesa:18},
   M52_2V_F_1134_N:{kitCode:'SE2V5650',panelsPorMesa:18},
+  M52_2V_F_1134_N20:{kitCode:'SE2V5677',panelsPorMesa:20},
 };
 const ROOF_ITEMS={
   ACANALADA:{central:'SEC5367',lateral:'SEC5368'},
