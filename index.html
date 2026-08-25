@@ -272,34 +272,34 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
           <label>Tipo de estructura</label>
           <select id="struct-type" onchange="onStructChange(this.value)">
             <optgroup label="Multipanel — a piso">
-              <option value="MPC">Multipanel MPC — Drill — 30° · MPC 14 30 25 D</option>
-              <option value="MP70">Multipanel C70 — Drill — 30° · MP 70 14 30 20 D</option>
-              <option value="MP70F">Multipanel C70 — Fix — 30° · MP 70 14 30 20 F (Fix)</option>
-              <option value="MP80">Multipanel C80 — Drill — 30° · MP 80 14 30 20 D</option>
-              <option value="MP80F">Multipanel C80 — Fix — 30° · MP 80 14 30 20 F (Fix)</option>
+              <option value="MPC">MPC 14 30 25 D</option>
+              <option value="MP70">MP 70 14 30 20 D</option>
+              <option value="MP70F">MP 70 14 30 20 F (Fix)</option>
+              <option value="MP80">MP 80 14 30 20 D</option>
+              <option value="MP80F">MP 80 14 30 20 F (Fix)</option>
             </optgroup>
             <optgroup label="Estructuras 2V — a piso">
-              <option value="T54" disabled>2V T54 — Drill — 30° (Próximamente) · T54 2V 12 30 25 D</option>
-              <option value="M42_2V_F">2V M42 — 18 paneles — 1134 mm — Fix — 30° · SE2V5455 — M42 2V 14 30 29 F (18p x 1134)</option>
-              <option value="MT40_2V_F">2V MT40 — 18 paneles — 1134 mm — Fix — 30° · SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)</option>
-              <option value="M52_2V_F_1303">2V M52 — 18 paneles — 1303 mm — Fix — 30° · SE2V5486 — M52 2V 14 30 33 F (18p x 1303)</option>
-              <option value="M52_2V_F_1134">2V M52 — 18 paneles — 1134 mm — Fix — 30° · SE2V5557 — M52 2V 14 30 33 F (18p x 1134)</option>
-              <option value="M52_2V_F_1303_N">2V M52-2 — 18 paneles — 1303 mm — Fix — 30° (Nuevo) · SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303)</option>
-              <option value="M52_2V_F_1134_N">2V M52-2 — 18 paneles — 1134 mm — Fix — 30° (Nuevo) · SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134)</option>
-              <option value="M52_2V_F_1134_N20">2V M52-2 — 20 paneles — 1134 mm — Fix — 30° (Nuevo) · SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134)</option>
+              <option value="T54" disabled>T54 2V 12 30 25 D (Próximamente)</option>
+              <option value="M42_2V_F">SE2V5455 — M42 2V 14 30 29 F (18p x 1134)</option>
+              <option value="MT40_2V_F">SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)</option>
+              <option value="M52_2V_F_1303">SE2V5486 — M52 2V 14 30 33 F (18p x 1303)</option>
+              <option value="M52_2V_F_1134">SE2V5557 — M52 2V 14 30 33 F (18p x 1134)</option>
+              <option value="M52_2V_F_1303_N">SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303) [nuevo]</option>
+              <option value="M52_2V_F_1134_N">SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134) [nuevo]</option>
+              <option value="M52_2V_F_1134_N20">SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134) [nuevo]</option>
             </optgroup>
             <optgroup label="Bombeo — a piso">
-              <option value="BOMBEO_1P_D">Kit Bombeo — 1 panel — Drill — 30° · SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
-              <option value="BOMBEO_2P_D">Kit Bombeo — 2 paneles — Drill — 30° · SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
-              <option value="BOMBEO_1P_F">Kit Bombeo — 1 panel — Fix — 30° · SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
-              <option value="BOMBEO_2P_F">Kit Bombeo — 2 paneles — Fix — 30° · SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
+              <option value="BOMBEO_1P_D">SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
+              <option value="BOMBEO_2P_D">SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
+              <option value="BOMBEO_1P_F">SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
+              <option value="BOMBEO_2P_F">SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
             </optgroup>
             <optgroup label="Monopanel Vertical — a piso">
-              <option value="MV_30D">Monopanel Vertical — Drill — 30° · 1V 14 30 D</option>
-              <option value="MV_40D">Monopanel Vertical — Drill — 40° · 1V 14 40 D</option>
-              <option value="MV_30F">Monopanel Vertical — Fix — 30° · 1V 14 30 F</option>
-              <option value="MV_40F">Monopanel Vertical — Fix — 40° · 1V 14 40 F</option>
-              <option value="MV_50F">Monopanel Vertical — Fix — 50° · 1V 14 50 F</option>
+              <option value="MV_30D">1V 14 30 D</option>
+              <option value="MV_40D">1V 14 40 D</option>
+              <option value="MV_30F">1V 14 30 F</option>
+              <option value="MV_40F">1V 14 40 F</option>
+              <option value="MV_50F">1V 14 50 F</option>
             </optgroup>
             <optgroup label="Fijaciones de techo">
               <option value="ACANALADA">Chapa Acanalada (Easy Grip)</option>
