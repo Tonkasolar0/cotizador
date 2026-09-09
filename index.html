@@ -708,6 +708,9 @@ const ITEMS={
   // Estacas Ø42,4 pata sur MPC (H160, confirmado — plano SEE5664 traía error de tipeo H110, corregido a H160)
   'SEE5664':{desc:'Conj. estaca MPC - T42.4 H160 L1063',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
   'SEE5665':{desc:'Conj. estaca MPC - T42.4 H160 L1277',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
+  // Estacas hormigón MPC (L500, para anclaje a hormigón en vez de hincar en tierra)
+  'SEE5686':{desc:'Conj. estaca hormigón MPC - T33.7 L500',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
+  'SEE5688':{desc:'Conj. estaca hormigón MPC - T42.4 L500',cat:'estaca',sub:'estaca_mpc',group:'mpc_t54'},
   // Estacas Ø42,4 (T54)
   'X5920':{desc:'Conj. estaca tubo 42.4 largo 1300 mm',cat:'estaca',sub:'estaca_t54',group:'mpc_t54'},
   'X5921':{desc:'Conj. estaca tubo 42.4 largo 1700 mm',cat:'estaca',sub:'estaca_t54',group:'mpc_t54'},
@@ -820,11 +823,13 @@ const MP80_CORREA_BY_LEN={2000:'SEVV5286',2200:'SEVV5287',2400:'SEVV5288',2600:'
 // Pata norte MPC: modelo único (confirmado)
 const ESTACAS_MPC_NORTE=[
   {code:'SEE5604',label:'L797 mm'},
+  {code:'SEE5686',label:'L500 mm — Hormigón'},
 ];
 // Pata sur MPC: modelo Ø42,4 H160, dos largos (confirmado)
 const ESTACAS_MPC_SUR=[
   {code:'SEE5664',label:'L1063 mm'},
   {code:'SEE5665',label:'L1277 mm'},
+  {code:'SEE5688',label:'L500 mm — Hormigón'},
 ];
 // Mapa central: qué lista de estacas usa cada posición (norte/sur) por tipo de estructura.
 // Si un tipo no aparece acá, populateEstacas() usa la misma lista "opts" para ambos lados (comportamiento original).
