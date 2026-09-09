@@ -1610,7 +1610,7 @@ function calcular(){
     const panelTotal=isMV?panelTotalMV:isM2V?panelTotalM2V:panelQtyRaw*filas;
     const estacaNorte=document.getElementById('estaca-norte').value||'';
     const estacaSur=document.getElementById('estaca-sur').value||'';
-    const bom=isMV?buildMvBOM(structType,panelTotalMV,estacaNorte,estacaSur):isBombeo?buildBombeoBOM(structType,estacaNorte,estacaSur):isM2V?buildM2VBOM(structType,cantMesas):buildRoofBOM(structType,panelQtyRaw,filas,parseInt(panelFrame));
+    const bom=isMV?buildMvBOM(structType,panelTotalMV,estacaNorte,estacaSur):isBombeo?buildBombeoBOM(structType,estacaNorte,estacaSur):isM2V?buildM2VBOM(structType):buildRoofBOM(structType,panelQtyRaw,filas,parseInt(panelFrame));
     const structNames={
       ACANALADA:'Chapa Acanalada Easy Grip',TRAPEZOIDAL:'Chapa Trapezoidal T101',U45:'Techo U45',PLANOR:'Planor 2',
       BOMBEO_1P_D:'SEV5239 — 1V 14 30 D Bombeo 1 panel',BOMBEO_2P_D:'SEV5247 — 1V 14 30 D Bombeo 2 paneles',
@@ -1639,7 +1639,7 @@ function calcular(){
   const navRes=document.getElementById('nav-resultado');
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
     showInner('materiales');
-    renderBOM(bom);
+    renderBOM(bom, isM2V?cantMesas:1);
     saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
       const el=document.getElementById('cotizacion-numero');
       const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
@@ -1942,11 +1942,11 @@ function buildBombeoBOM(structType, estacaNorte, estacaSur){
   return bom;
 }
 
-function buildM2VBOM(structType, cantMesas){
+function buildM2VBOM(structType){
   const bom={};
   const d=M2V_ITEMS[structType];
   if(!d||!d.kitCode) return bom;
-  bom[d.kitCode]=cantMesas;
+  bom[d.kitCode]=1; // 1 kit por mesa — la cantidad total se calcula en renderBOM con cantMesas
   return bom;
 }
 
