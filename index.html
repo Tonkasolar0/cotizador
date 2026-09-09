@@ -308,10 +308,10 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
                 <option value="M52_2V_F_1134_N20">2V M52-2 — 20 paneles — 1134 mm — Fix — 30° (Nuevo) · SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134)</option>
               </optgroup>
               <optgroup label="Bombeo — a piso">
-                <option value="BOMBEO_1P_D">Kit Bombeo — 1 panel — Drill — 30° · SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
-                <option value="BOMBEO_2P_D">Kit Bombeo — 2 paneles — Drill — 30° · SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
-                <option value="BOMBEO_1P_F">Kit Bombeo — 1 panel — Fix — 30° · SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
-                <option value="BOMBEO_2P_F">Kit Bombeo — 2 paneles — Fix — 30° · SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
+                <option value="BOMBEO_1P_D" hidden>Kit Bombeo — 1 panel — Drill — 30° · SEV5239 — 1V 14 30 D Bombeo 1 panel</option>
+                <option value="BOMBEO_2P_D" hidden>Kit Bombeo — 2 paneles — Drill — 30° · SEV5247 — 1V 14 30 D Bombeo 2 paneles</option>
+                <option value="BOMBEO_1P_F" hidden>Kit Bombeo — 1 panel — Fix — 30° · SEP5300 — 1V 14 30 F Bombeo 1 panel (Fix)</option>
+                <option value="BOMBEO_2P_F" hidden>Kit Bombeo — 2 paneles — Fix — 30° · SEP5301 — 1V 14 30 F Bombeo 2 paneles (Fix)</option>
               </optgroup>
               <optgroup label="Monopanel Vertical — a piso">
                 <option value="MV_30D">Monopanel Vertical — Drill — 30° · 1V 14 30 D</option>
@@ -2509,8 +2509,10 @@ function buildStructMenu(){
   let html='';
   Array.from(sel.children).forEach(group=>{
     if(group.tagName!=='OPTGROUP') return;
+    const visibleOpts=Array.from(group.children).filter(opt=>!opt.hidden);
+    if(!visibleOpts.length) return; // grupo sin opciones visibles: no se dibuja (ej. Bombeo, oculto temporalmente)
     html+=`<div class="cs-group-label">${group.label}</div>`;
-    Array.from(group.children).forEach(opt=>{
+    visibleOpts.forEach(opt=>{
       const parts=opt.textContent.split(' · ');
       const main=parts[0];
       const sub=parts[1]||'';
