@@ -655,6 +655,9 @@ const EXTENSOR_POSITIONS=[150,300,450,600,750,900];
 const PANEL_GAP=20,BORDER_MIN=40,INTERF_HALF=99;
 const STRUCT_ROWS={MPC:1,T54:2,MP70:1,MP70F:1,MP80:1,MP80F:1,ACANALADA:1,TRAPEZOIDAL:1,U45:1,PLANOR:1,BOMBEO_1P_D:1,BOMBEO_2P_D:1,BOMBEO_1P_F:1,BOMBEO_2P_F:1,MV_30D:1,MV_40D:1,MV_30F:1,MV_40F:1,MV_50F:1,M42_2V_F:2,MT40_2V_F:2,M52_2V_F_1303:2,M52_2V_F_1134:2,M52_2V_F_1303_N:2,M52_2V_F_1134_N:2,M52_2V_F_1134_N20:2};
 const ROOF_TYPES=new Set(['ACANALADA','TRAPEZOIDAL','U45','PLANOR','BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P_F','MV_30D','MV_40D','MV_30F','MV_40F','MV_50F','M42_2V_F','MT40_2V_F','M52_2V_F_1303','M52_2V_F_1134','M52_2V_F_1303_N','M52_2V_F_1134_N','M52_2V_F_1134_N20']);
+// Subconjunto de ROOF_TYPES: solo los tipos de techo puro (chapa/U45/Planor), sin bombeo/MV/M2V.
+// "Cantidad de mesas" no aplica a estos (no se usa en el cálculo), por eso se ocultan por separado.
+const TECHO_TYPES=new Set(['ACANALADA','TRAPEZOIDAL','U45','PLANOR']);
 const BOMBEO_TYPES=new Set(['BOMBEO_1P_D','BOMBEO_2P_D','BOMBEO_1P_F','BOMBEO_2P_F']);
 const MV_TYPES=new Set(['MV_30D','MV_40D','MV_30F','MV_40F','MV_50F']);
 const MV_FIX_TYPES=new Set(['MV_30F','MV_40F','MV_50F']);
@@ -918,9 +921,10 @@ function onStructChange(structType){
   if(panelQtyEl) panelQtyEl.style.display=(isBombeo||isM2V)?'none':'';
   const lbl2=document.getElementById('panel-qty-label');
   if(lbl2) lbl2.textContent=isBombeo?'Cantidad de paneles':'Paneles por mesa';
-  // Cantidad de mesas: all except bombeo
+  // Cantidad de mesas: todas excepto bombeo y techo puro (chapa/U45/Planor no usan mesas en el cálculo)
+  const isTecho=TECHO_TYPES.has(structType);
   const cantMesasEl=document.getElementById('field-cant-mesas');
-  if(cantMesasEl) cantMesasEl.style.display=!isBombeo?'':'none';
+  if(cantMesasEl) cantMesasEl.style.display=(!isBombeo&&!isTecho)?'':'none';
   // Marco: campo + U45, NOT bombeo, NOT M2V
   const marcoEl=document.getElementById('field-marco');
   if(marcoEl) marcoEl.style.display=(!isRoof||isU45)&&!isMV&&!isM2V?'':'none';
