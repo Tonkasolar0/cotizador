@@ -1922,7 +1922,7 @@ function buildMvBOM(structType, panelQty, estacaNorte, estacaSur){
   if(!d) return bom;
   const nPatas=panelQty+1;
   add(d.pata, nPatas);
-  add('SEA3319', panelQty*6);  // 6 morsetas per panel
+  add('SEA3319', panelQty*4);  // 4 morsetas per panel (2 de cada lado)
   add(d.rienda, 2);
   if(!d.isFix){
     if(estacaNorte) add(estacaNorte, nPatas);
