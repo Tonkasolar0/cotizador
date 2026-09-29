@@ -9,6 +9,12 @@
 <title>Cotizador de Estructuras — Tonka Solar</title>
 <!-- ==========================================================
      Cotizador Tonka Solar
+     Versión: 4.2
+     Fecha:   2026-09-29
+     Cambios: MP70/MP80 con 2 patas = 1 sola correa por línea con
+              voladizo de un solo lado (generador, BOM, tarjeta, layout).
+              Fix largo de correas extremo en layout (-8mm)
+     ----------------------------------------------------------
      Versión: 4.1
      Fecha:   2026-08-21
      Cambios: Nuevos códigos M52-2 2V (SE2V5641 / SE2V5650) agregados
@@ -1443,10 +1449,13 @@ function mpCalcConfigs(panelQty, panelW){
 
   for(const {L,R} of combos){
     for(let nPatas=2; nPatas<=maxPatas; nPatas++){
+      if(nPatas===2 && L!==2000 && R!==2000) continue; // 1 sola correa: voladizo de un solo lado
       const rng = mpGetUsableRange(panelQty, panelW, nPatas, L, R);
       if(!rng) continue;
       const {xMin,xMax,totalPanelLen,innerLen,leftEdge,rightEdge,voladizoL,voladizoR} = rng;
-      const desc = mpCorreaLabel(L,R);
+      const desc = nPatas===2
+        ? `Correa única ${Math.max(L,R)}mm — ` + (L===R ? 'sin voladizo' : `voladizo ${Math.round(Math.max(voladizoL,voladizoR))}mm ${R>L?'der':'izq'}`)
+        : mpCorreaLabel(L,R);
 
       // ── CENTRADO ──
       {
@@ -1725,7 +1734,7 @@ function renderConfigs(configs){
       </div>`;
       // Middle stat: extensors for MPC/T54, correa length for MP
       const midStat = cfg.isMP
-        ? `<div class="stat"><div class="stat-val" style="font-size:11px">${cfg.leftLen||2000}/${cfg.rightLen||2000}</div><div class="stat-lbl">Correa ext</div></div>`
+        ? `<div class="stat"><div class="stat-val" style="font-size:11px">${cfg.nSpans===1 ? Math.max(cfg.leftLen||2000,cfg.rightLen||2000) : `${cfg.leftLen||2000}/${cfg.rightLen||2000}`}</div><div class="stat-lbl">Correa ext</div></div>`
         : `<div class="stat"><div class="stat-val">${extCount}</div><div class="stat-lbl">Extensores</div></div>`;
       div.innerHTML=`
         <div class="config-title">${cfg.desc}</div>
@@ -1846,8 +1855,8 @@ function buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows){
     const rightLen=cfg.rightLen||2000;
     const nLines=2; // north + south
     if(cfg.nSpans===1){
-      // Only 1 span: left correa IS the only correa (use leftLen)
-      add(correaByLen[leftLen], nLines);
+      // Only 1 span: una sola correa por línea (voladizo de un solo lado). El otro lado vale 2000.
+      add(correaByLen[Math.max(leftLen,rightLen)], nLines);
     } else {
       // Left end correa + right end correa + (nSpans-2) internal correas per line
       add(correaByLen[leftLen], nLines);
@@ -2347,13 +2356,18 @@ function renderLayoutMP(cfg,panelQty,panelW){
   for(let sp=0;sp<cfg.nSpans;sp++){
     const isEndLeft = sp===0;
     const isEndRight = sp===cfg.nSpans-1;
-    const correaLen = isEndLeft ? (cfg.leftLen||2000) : isEndRight ? (cfg.rightLen||2000) : 2000;
+    // 1 solo tramo (2 patas): una sola correa, arranca en el gap de una pata y vuela del otro lado
+    const single = cfg.nSpans===1;
+    const correaLen = single ? Math.max(cfg.leftLen||2000, cfg.rightLen||2000)
+      : isEndLeft ? (cfg.leftLen||2000) : isEndRight ? (cfg.rightLen||2000) : 2000;
     // Correa goes from gap of left pata to gap of right pata (or tip if end)
     const leftPataCenter = sp*MP_PATA_SPACING;
     const rightPataCenter = (sp+1)*MP_PATA_SPACING;
-    // inner end: gap-4mm from pata center
-    const x1mm = isEndLeft ? leftPataCenter - (correaLen - (rightPataCenter-leftPataCenter) - MP_GAP) : leftPataCenter + MP_GAP;
-    const x2mm = isEndRight ? rightPataCenter + (correaLen - (rightPataCenter-leftPataCenter) - MP_GAP) : rightPataCenter - MP_GAP;
+    // inner end: gap 4mm from pata center; end correa length measured from that gap
+    const x1mm = single ? -((cfg.leftLen||2000) - 2000 - MP_GAP)
+      : isEndLeft ? rightPataCenter - MP_GAP - correaLen : leftPataCenter + MP_GAP;
+    const x2mm = single ? MP_PATA_SPACING + ((cfg.rightLen||2000) - 2000 - MP_GAP)
+      : isEndRight ? leftPataCenter + MP_GAP + correaLen : rightPataCenter - MP_GAP;
     // With mirrored px(), x1>x2 so use min/max
     const px1=Math.min(px(x1mm),px(x2mm)), px2=Math.max(px(x1mm),px(x2mm));
     const hasVoladizo = (isEndLeft && correaLen>2000) || (isEndRight && correaLen>2000);
