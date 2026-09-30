@@ -2071,11 +2071,12 @@ function exportPedidoExcel(){
   const discPct=parseFloat(document.getElementById('bom-discount')?.value)||0;
   const descFrac=discPct/100;
   // Encabezados (formato del sistema de gestión)
-  const aoa=[['CODIGO','CANTIDAD','PRECIO DE LISTA EN USD','DESCUENTO','PRECIO FINAL','NOTA DEL ITEM','PRECIO TOTAL FINAL']];
+  const aoa=[['CODIGO','CANTIDAD','PRECIO DE LISTA EN USD','DESCUENTO','PRECIO FINAL','NOTA DEL ITEM','PRECIO TOTAL FINAL','DESCRIPCION']];
   const codes=Object.keys(lastBOMData);
   codes.forEach((code,i)=>{
     const qtyTotal=(lastBOMData[code]||0)*cantMesas;
     if(qtyTotal<=0)return;
+    const desc=(ITEMS[code]&&ITEMS[code].desc)||'';
     const precioLista=prices[code]||0; // si no hay precio cargado, va 0 (se actualizará al cargar precio)
     const r=aoa.length+1; // fila real en la hoja (1-indexed)
     aoa.push([
@@ -2085,18 +2086,19 @@ function exportPedidoExcel(){
       descFrac,
       {f:`C${r}*(1-D${r})`},
       {f:`IF(D${r}<>0, "Descuento acordado: " & D${r}*100 & "%", IF(E${r}<>C${r}, "Precio acordado", ""))`},
-      {f:`E${r}*B${r}`}
+      {f:`E${r}*B${r}`},
+      desc
     ]);
   });
   // Fila de total: SUM de la columna G
   const lastDataRow=aoa.length; // última fila con datos (1-indexed)
   if(lastDataRow>1){
     const sumRow=lastDataRow+1;
-    const blank=['','','','','','',{f:`SUM(G2:G${lastDataRow})`}];
+    const blank=['','','','','','',{f:`SUM(G2:G${lastDataRow})`},''];
     aoa.push(blank);
   }
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:9},{wch:10},{wch:20},{wch:11},{wch:13},{wch:30},{wch:19}];
+  ws['!cols']=[{wch:9},{wch:10},{wch:20},{wch:11},{wch:13},{wch:30},{wch:19},{wch:45}];
   // Nombre de hoja y archivo con fecha dd-mm-aaaa
   const d=new Date();
   const dd=String(d.getDate()).padStart(2,'0');
