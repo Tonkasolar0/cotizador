@@ -2120,8 +2120,9 @@ function setFichaForPDF(structType, structName, displayPanels){
   const isBombeo=BOMBEO_TYPES.has(structType);
   const isMV=MV_TYPES.has(structType);
   const isM2V=M2V_KIT_TYPES.has(structType);
-  // Mesas: 1 para bombeo; el resto lee el campo
-  const mesas=isBombeo?1:(parseInt(document.getElementById('cant-mesas')?.value)||1);
+  // Mesas: 1 para bombeo; en techo (chapa/U45/Planor) mesas = filas; el resto lee el campo
+  const isTechoFilas=isRoof&&!isBombeo&&!isMV&&!isM2V;
+  const mesas=isBombeo?1:isTechoFilas?(parseInt(r.filas)||parseInt(document.getElementById('panel-filas')?.value)||1):(parseInt(document.getElementById('cant-mesas')?.value)||1);
   // Wp por panel: techo/M2V usan panel-watt; campo/MV usan panel-watt-campo
   const watt=(isRoof&&!isM2V)
     ? (parseInt(document.getElementById('panel-watt')?.value)||0)
