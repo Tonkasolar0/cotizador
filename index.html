@@ -492,8 +492,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     </div>
     <div class="result-actions">
       <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="showPage('cotizador')">← Volver</button>
-      <button class="btn btn-yellow btn-sm" onclick="window.print()">⬇ Exportar PDF</button>
-      <button class="btn btn-yellow btn-sm" onclick="exportPedidoExcel()">⬇ Crear Excel (pedido)</button>
+      <button class="btn btn-yellow btn-sm" onclick="exportarPDF()">⬇ Exportar PDF</button>
+      <button class="btn btn-yellow btn-sm" onclick="exportarExcel()">⬇ Crear Excel (pedido)</button>
       <button id="btn-add-pedido" class="btn btn-sm btn-pedido" onclick="agregarAlPedido()">+ Agregar al pedido</button>
       <button id="btn-ver-pedido" class="btn btn-sm btn-pedido" style="display:none" onclick="verPedido()">Ver pedido</button>
     </div>
@@ -1683,13 +1683,7 @@ function calcular(){
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
     showInner('materiales');
     renderBOM(bom, isM2V?cantMesas:1);
-    saveCotizacion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom}).then(num=>{
-      const el=document.getElementById('cotizacion-numero');
-      const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
-      if(el) el.textContent=numTxt;
-      const fichaEl=document.getElementById('ficha-numero-cotizacion');
-      if(fichaEl) fichaEl.textContent=numTxt||'—';
-    });
+    prepararNumeracion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom});
     return;
   }
 
@@ -1852,13 +1846,7 @@ function buildResult(cfg){
   // Ficha de configuración para el PDF
   setFichaForPDF(structType, structName, displayPanels);
   const bomData=buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows);
-  saveCotizacion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData}).then(num=>{
-    const el=document.getElementById('cotizacion-numero');
-    const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
-    if(el) el.textContent=numTxt;
-    const fichaEl=document.getElementById('ficha-numero-cotizacion');
-    if(fichaEl) fichaEl.textContent=numTxt||'—';
-  });
+  prepararNumeracion({usuario:perfil.nombre||'—',estructura:structName,paneles:currentResult.panelTotal,mesas:null,bom:bomData});
 }
 
 // ===== BOM =====
@@ -2144,6 +2132,49 @@ function exportPedidoExcel(){
   XLSX.writeFile(wb,`Pedido_${titulo}_${fecha}.xlsx`);
 }
 
+// ===== NUMERACIÓN: el número se pide al exportar (PDF o Excel), no al calcular =====
+// Así no se consumen números con pruebas o cotizaciones que nunca se mandan.
+// Una vez asignado, PDF y Excel de la misma cotización comparten el número.
+let numeracion={datos:null,num:null,onNum:null,pidiendo:null};
+
+function mostrarNumero(num){
+  const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
+  const el=document.getElementById('cotizacion-numero');
+  if(el){el.textContent=numTxt;el.style.display=numTxt?'':'none';}
+  const fichaEl=document.getElementById('ficha-numero-cotizacion');
+  if(fichaEl) fichaEl.textContent=numTxt||'—';
+}
+
+function prepararNumeracion(datos,numExistente,onNum){
+  numeracion={datos,num:numExistente||null,onNum:onNum||null,pidiendo:null};
+  mostrarNumero(numeracion.num);
+}
+
+async function asegurarNumero(){
+  if(numeracion.num||!numeracion.datos) return numeracion.num;
+  if(!numeracion.pidiendo){
+    const ref=numeracion;
+    ref.pidiendo=saveCotizacion(ref.datos).then(num=>{
+      if(num){ref.num=num;if(ref.onNum)ref.onNum(num);}
+      ref.pidiendo=null;
+      return num;
+    });
+  }
+  const num=await numeracion.pidiendo;
+  mostrarNumero(numeracion.num);
+  return num;
+}
+
+async function exportarPDF(){
+  await asegurarNumero();
+  window.print();
+}
+
+async function exportarExcel(){
+  await asegurarNumero();
+  exportPedidoExcel();
+}
+
 // ===== PEDIDO: varias configuraciones de la misma estructura =====
 // Cada renglón guarda el BOM TOTAL de esa configuración (por mesa × mesas).
 // El consolidado suma códigos de todos los renglones.
@@ -2269,19 +2300,13 @@ function verPedido(){
   showInner('materiales');
   const navRes=document.getElementById('nav-resultado');
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
-  // Número de cotización: uno por pedido (se reusa mientras el pedido no cambie)
-  const setNum=num=>{
-    const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
-    const el=document.getElementById('cotizacion-numero');
-    if(el) el.textContent=numTxt;
-    setFichaPedido(numTxt||'—');
-  };
-  if(pedido.num){setNum(pedido.num);return;}
-  setNum(null);
-  saveCotizacion({usuario:perfil.nombre||'—',estructura:`${pedido.structName} (pedido ${n} config.)`,paneles:totPaneles,mesas:totMesas,bom}).then(num=>{
-    if(num){pedido.num=num;savePedido();}
-    setNum(num);
-  });
+  // Número de cotización: uno por pedido, se pide al exportar y se reusa mientras el pedido no cambie
+  setFichaPedido('—');
+  prepararNumeracion(
+    {usuario:perfil.nombre||'—',estructura:`${pedido.structName} (pedido ${n} config.)`,paneles:totPaneles,mesas:totMesas,bom},
+    pedido.num,
+    num=>{pedido.num=num;savePedido();}
+  );
 }
 
 function setFichaPedido(numTxt){
