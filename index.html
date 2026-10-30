@@ -116,6 +116,19 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .bom-table th{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;padding:8px 12px;border-bottom:2px solid var(--border);text-align:left}
 .bom-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .bom-table tr:last-child td{border-bottom:none}
+/* ===== PEDIDO (varias configuraciones) ===== */
+.btn-pedido{background:#fff;color:var(--dark-blue)}.btn-pedido:hover{background:#e8eef6}
+.btn-pedido:disabled{opacity:.6;cursor:default}
+.bom-table.pedido-mode th:nth-child(3),.bom-table.pedido-mode td:nth-child(3){display:none}
+.pedido-table .pedido-col-del{width:40px;text-align:right}
+.pedido-del{background:none;border:none;color:#DC2626;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:4px}
+.pedido-del:hover{background:#FEE2E2}
+.pedido-banner{margin-top:12px;padding:10px 14px;border:1.5px solid var(--blue);border-radius:8px;background:#EFF6FF;font-size:12px;color:var(--dark-blue);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pedido-banner .pb-txt{flex:1;min-width:180px}
+@media print{
+  .pedido-col-del{display:none!important}
+  body.pedido-mode #pdf-layout-container,body.pedido-mode #pdf-layout-msg{display:none!important}
+}
 .bom-table tr:hover td{background:var(--bg)}
 .code{font-family:monospace;font-size:12px;font-weight:600;color:var(--blue)}
 .bom-total{display:flex;justify-content:space-between;align-items:flex-end;padding:12px;border-top:2px solid var(--dark-blue);margin-top:4px}
@@ -422,6 +435,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
           </div>
         </div>
         <button class="btn btn-primary btn-lg" style="width:100%" onclick="calcular()">Calcular estructura →</button>
+        <div id="pedido-banner" class="pedido-banner" style="display:none"></div>
         </div><!-- end datos-body -->
       </div>
       <div class="card gap-top">
@@ -480,6 +494,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
       <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="showPage('cotizador')">← Volver</button>
       <button class="btn btn-yellow btn-sm" onclick="window.print()">⬇ Exportar PDF</button>
       <button class="btn btn-yellow btn-sm" onclick="exportPedidoExcel()">⬇ Crear Excel (pedido)</button>
+      <button id="btn-add-pedido" class="btn btn-sm btn-pedido" onclick="agregarAlPedido()">+ Agregar al pedido</button>
+      <button id="btn-ver-pedido" class="btn btn-sm btn-pedido" style="display:none" onclick="verPedido()">Ver pedido</button>
     </div>
   </div>
   <div class="inner-tabs">
@@ -527,6 +543,19 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     </div>
   </div>
   <div class="inner-page" id="inner-materiales">
+    <div class="card" id="pedido-renglones-card" style="display:none">
+      <div class="card-title">Configuraciones del pedido</div>
+      <table class="bom-table pedido-table">
+        <thead><tr>
+          <th>Configuración</th>
+          <th style="text-align:center">Paneles x mesa</th>
+          <th style="text-align:center">Mesas</th>
+          <th style="text-align:center">Paneles</th>
+          <th class="pedido-col-del"></th>
+        </tr></thead>
+        <tbody id="pedido-renglones-body"></tbody>
+      </table>
+    </div>
     <div class="card">
       <div class="card-title">Lista de materiales</div>
       <table class="bom-table">
@@ -1637,7 +1666,7 @@ function calcular(){
     };
     const structName=structNames[structType];
     const displayPanels=isMV?`${panelTotalMV} panel${panelTotalMV>1?'es':''}`:isM2V?`${panelTotalM2V} paneles (${cantMesas} mesa${cantMesas>1?'s':''})`:`${panelTotal} panel${panelTotal>1?'es':''} (${panelQtyRaw}×${filas})`;
-    currentResult={structType,panelQty:isM2V?m2vData.panelsPorMesa:panelQtyRaw,panelTotal,filas,panelFrame,projectName,isRoof:true};
+    currentResult={structType,structName,panelQty:isM2V?m2vData.panelsPorMesa:panelQtyRaw,panelTotal,filas,panelFrame,projectName,isRoof:true};
     // Update PDF header
     document.getElementById('pdf-project-name').textContent=projectName||'Cotización';
     document.getElementById('pdf-project-sub').textContent=`${structName} — ${displayPanels}`;
@@ -1786,6 +1815,7 @@ function buildResult(cfg){
   const{structType,panelQty,panelTotal,panelW,panelH,panelFrame,projectName,rows}=currentResult;
   const structNames={MPC:'MPC 14 30 25 D',T54:'T54 2V 12 30 25 D',MP70:'MP 70 14 30 20 D',MP70F:'MP 70 14 30 20 F',MP80:'MP 80 14 30 20 D',MP80F:'MP 80 14 30 20 F',BOMBEO_1P_D:'SEV5239 — 1V 14 30 D Bombeo 1 panel',BOMBEO_2P_D:'SEV5247 — 1V 14 30 D Bombeo 2 paneles',BOMBEO_1P_F:'SEP5300 — 1V 14 30 F Bombeo 1 panel',BOMBEO_2P_F:'SEP5301 — 1V 14 30 F Bombeo 2 paneles',MV_30D:'1V 14 30 D',MV_40D:'1V 14 40 D',MV_30F:'1V 14 30 F',MV_40F:'1V 14 40 F',MV_50F:'1V 14 50 F'};
   const structName=structNames[structType]||structType;
+  currentResult.structName=structName;
   const grpName={centrado:'Centrado',extremo:'Extremo izq/der'}[cfg.group]||'';
   const displayPanels=structType==='T54'?`${panelTotal} paneles (${panelQty}×2 filas)`:`${panelQty} panel${panelQty>1?'es':''}`;
   const dateStr=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'});
@@ -2020,6 +2050,7 @@ function updateDiscount(){
 }
 
 function getProjectWatts(){
+  if(pedidoView) return pedido.items.reduce((s,it)=>s+(it.watts||0),0);
   const isRoof=currentResult&&currentResult.isRoof;
   const isM2V=currentResult&&M2V_KIT_TYPES.has(currentResult.structType);
   if(isRoof&&!isM2V){
@@ -2033,10 +2064,12 @@ function getProjectWatts(){
   }
 }
 
-function renderBOM(bom,cantMesas){
+function renderBOM(bom,cantMesas,isPedido){
   // cantMesas: cantidad de mesas para estructuras a piso. Si no se pasa (techo/bombeo/MV
   // ya vienen con cantidades totales), se asume 1 y las dos columnas muestran lo mismo.
+  // isPedido: true cuando se muestra el BOM consolidado de varias configuraciones.
   cantMesas=parseInt(cantMesas)||1;
+  setPedidoView(!!isPedido);
   lastBOMData=bom; lastBOMCantMesas=cantMesas;
   const tbody=document.getElementById('bom-body');
   tbody.innerHTML='';
@@ -2109,6 +2142,214 @@ function exportPedidoExcel(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,fecha);
   XLSX.writeFile(wb,`Pedido_${titulo}_${fecha}.xlsx`);
+}
+
+// ===== PEDIDO: varias configuraciones de la misma estructura =====
+// Cada renglón guarda el BOM TOTAL de esa configuración (por mesa × mesas).
+// El consolidado suma códigos de todos los renglones.
+let pedido={structType:null,structName:'',items:[],num:null};
+let pedidoView=false;
+const PEDIDO_KEY='tonka_pedido_v1';
+
+function loadPedido(){
+  try{const s=localStorage.getItem(PEDIDO_KEY);if(s){const p=JSON.parse(s);if(p&&Array.isArray(p.items))pedido=p;}}catch(e){}
+}
+function savePedido(){
+  try{localStorage.setItem(PEDIDO_KEY,JSON.stringify(pedido));}catch(e){}
+}
+
+function agregarAlPedido(){
+  if(!currentResult||!lastBOMData||!Object.keys(lastBOMData).length){alert('Primero generá una cotización.');return;}
+  if(pedidoView) return;
+  const r=currentResult;
+  const structType=r.structType;
+  const structName=r.structName||structType;
+  if(pedido.items.length&&pedido.structType!==structType){
+    if(!confirm(`El pedido en curso es de ${pedido.structName}.\n¿Descartarlo y empezar uno nuevo con ${structName}?`))return;
+    pedido={structType:null,structName:'',items:[],num:null};
+  }
+  // BOM total de esta configuración
+  const mult=lastBOMCantMesas||1;
+  const bomTotal={};
+  Object.entries(lastBOMData).forEach(([c,q])=>{if(q)bomTotal[c]=q*mult;});
+  // Mesas y paneles (misma lógica que la ficha del PDF)
+  const isBombeo=BOMBEO_TYPES.has(structType);
+  const isTechoFilas=ROOF_TYPES.has(structType)&&!isBombeo&&!MV_TYPES.has(structType)&&!M2V_KIT_TYPES.has(structType);
+  const mesas=isBombeo?1:isTechoFilas?(parseInt(r.filas)||1):(parseInt(document.getElementById('cant-mesas')?.value)||1);
+  const panelTotal=parseInt(r.panelTotal)||0;
+  const porMesa=mesas?Math.round(panelTotal/mesas):panelTotal;
+  // Descripción de la config elegida (solo estructuras a piso con algoritmo)
+  let cfgDesc='';
+  if(!r.isRoof&&selectedConfigKey){
+    const cfg=findConfig(selectedConfigKey);
+    if(cfg) cfgDesc=`${cfg.nPatas} patas — ${cfg.desc}`;
+  }
+  pedido.structType=structType;
+  pedido.structName=structName;
+  pedido.items.push({
+    porMesa,mesas,panelTotal,cfgDesc,
+    watts:getProjectWatts(),
+    panelW:r.panelW||null,panelH:r.panelH||null,panelFrame:r.panelFrame||null,
+    bom:bomTotal
+  });
+  pedido.num=null; // el pedido cambió: se numera de nuevo al verlo
+  savePedido();
+  r._enPedido=true;
+  refreshPedidoUI();
+}
+
+function quitarDelPedido(i){
+  if(!confirm('¿Quitar esta configuración del pedido?'))return;
+  pedido.items.splice(i,1);
+  pedido.num=null;
+  if(!pedido.items.length){pedido={structType:null,structName:'',items:[],num:null};}
+  savePedido();
+  if(pedidoView){
+    if(pedido.items.length) verPedido();
+    else{setPedidoView(false);showPage('cotizador');}
+  }
+  refreshPedidoUI();
+}
+
+function vaciarPedido(){
+  if(!pedido.items.length)return;
+  if(!confirm('¿Vaciar el pedido completo?'))return;
+  pedido={structType:null,structName:'',items:[],num:null};
+  savePedido();
+  if(pedidoView){setPedidoView(false);showPage('cotizador');}
+  refreshPedidoUI();
+}
+
+function pedidoConsolidado(){
+  const bom={};
+  pedido.items.forEach(it=>Object.entries(it.bom).forEach(([c,q])=>{bom[c]=(bom[c]||0)+q;}));
+  return bom;
+}
+
+function verPedido(){
+  if(!pedido.items.length){alert('El pedido está vacío.');return;}
+  const bom=pedidoConsolidado();
+  const totPaneles=pedido.items.reduce((s,it)=>s+it.panelTotal,0);
+  const totMesas=pedido.items.reduce((s,it)=>s+it.mesas,0);
+  const n=pedido.items.length;
+  const projectName=document.getElementById('project-name').value||'Cotización';
+  const sub=`${pedido.structName} — ${totPaneles} paneles — ${totMesas} mesa${totMesas>1?'s':''} — ${n} configuraci${n>1?'ones':'ón'}`;
+  document.getElementById('result-title').textContent=projectName;
+  document.getElementById('result-sub').textContent=sub;
+  document.getElementById('pdf-project-name').textContent=projectName;
+  document.getElementById('pdf-project-sub').textContent=pedido.structName;
+  const dateStr=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('pdf-date-block').innerHTML=`<strong>${dateStr}</strong><span style="display:block;margin-top:2px;font-size:10px;color:#6B7280">${projectName}</span>`;
+  const vendorName=perfil.nombre||'Tonka Solar';
+  const contactParts=[];
+  if(perfil.tel)contactParts.push(perfil.tel);
+  if(perfil.mail)contactParts.push(perfil.mail);
+  document.getElementById('pdf-footer-vendor').textContent=vendorName;
+  document.getElementById('pdf-footer-contact').textContent=contactParts.join(' · ');
+  // Renglones
+  const tb=document.getElementById('pedido-renglones-body');
+  tb.innerHTML='';
+  pedido.items.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-size:13px"><strong>Mesa de ${it.porMesa} paneles</strong>${it.cfgDesc?`<span style="display:block;font-size:11px;color:var(--text-muted)">${it.cfgDesc}</span>`:''}</td>`+
+      `<td style="text-align:center">${it.porMesa}</td><td style="text-align:center">${it.mesas}</td>`+
+      `<td style="text-align:center;font-weight:700">${it.panelTotal}</td>`+
+      `<td class="pedido-col-del"><button class="pedido-del" title="Quitar" onclick="quitarDelPedido(${i})">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  const trTot=document.createElement('tr');
+  trTot.innerHTML=`<td style="font-weight:700">Total</td><td></td><td style="text-align:center;font-weight:700">${totMesas}</td><td style="text-align:center;font-weight:800;color:var(--dark-blue)">${totPaneles}</td><td class="pedido-col-del"></td>`;
+  tb.appendChild(trTot);
+  // Render fijo + BOM consolidado (cantMesas=1: las cantidades ya son totales)
+  setRenderForPDF(pedido.structType);
+  const tabLayout=document.getElementById('tab-layout');
+  if(tabLayout) tabLayout.style.display='none';
+  renderBOM(bom,1,true);
+  showPage('resultado');
+  showInner('materiales');
+  const navRes=document.getElementById('nav-resultado');
+  if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
+  // Número de cotización: uno por pedido (se reusa mientras el pedido no cambie)
+  const setNum=num=>{
+    const numTxt=num?`#${String(num).padStart(4,'0')}`:'';
+    const el=document.getElementById('cotizacion-numero');
+    if(el) el.textContent=numTxt;
+    setFichaPedido(numTxt||'—');
+  };
+  if(pedido.num){setNum(pedido.num);return;}
+  setNum(null);
+  saveCotizacion({usuario:perfil.nombre||'—',estructura:`${pedido.structName} (pedido ${n} config.)`,paneles:totPaneles,mesas:totMesas,bom}).then(num=>{
+    if(num){pedido.num=num;savePedido();}
+    setNum(num);
+  });
+}
+
+function setFichaPedido(numTxt){
+  const cont=document.getElementById('pdf-ficha');
+  if(!cont) return;
+  const its=pedido.items;
+  const totPaneles=its.reduce((s,it)=>s+it.panelTotal,0);
+  const totMesas=its.reduce((s,it)=>s+it.mesas,0);
+  const watts=its.reduce((s,it)=>s+(it.watts||0),0);
+  const uniq=f=>{const v=[...new Set(its.map(f))];return v.length===1?v[0]:null;};
+  const dimsU=uniq(it=>it.panelW&&it.panelH?`${it.panelW} × ${it.panelH} mm`:'—');
+  const marcoU=uniq(it=>it.panelFrame?`${it.panelFrame} mm`:'—');
+  const wpPanel=totPaneles&&watts?Math.round(watts/totPaneles):0;
+  const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const cliente=document.getElementById('project-name').value||'—';
+  const item=(lbl,val,id)=>`<div class="pdf-ficha-item"><span class="lbl">${lbl}</span><b${id?` id="${id}"`:''}>${val}</b></div>`;
+  cont.innerHTML=
+    `<div class="pdf-ficha-title">Ficha de configuración</div>`+
+    `<div class="pdf-ficha-grid">`+
+      item('N° cotización', numTxt, 'ficha-numero-cotizacion')+
+      item('Fecha', fecha)+
+      item('Cliente / proyecto', cliente)+
+      item('Estructura', pedido.structName)+
+      item('Cant. de paneles', String(totPaneles))+
+      item('Configuraciones', String(its.length))+
+      item('Mesas', String(totMesas))+
+      item('Dimensiones panel', dimsU??'Varias')+
+      item('Marco', marcoU??'Varios')+
+      item('Potencia por panel', wpPanel>0?`${wpPanel} Wp`:'—')+
+      item('Potencia total', watts>0?`${(watts/1000).toFixed(2)} kWp`:'—')+
+    `</div>`;
+}
+
+function setPedidoView(on){
+  pedidoView=on;
+  document.body.classList.toggle('pedido-mode',on);
+  const bomTable=document.querySelector('#inner-materiales .bom-table:not(.pedido-table)');
+  if(bomTable) bomTable.classList.toggle('pedido-mode',on);
+  const card=document.getElementById('pedido-renglones-card');
+  if(card) card.style.display=on?'block':'none';
+  refreshPedidoUI();
+}
+
+function refreshPedidoUI(){
+  const n=pedido.items.length;
+  const add=document.getElementById('btn-add-pedido');
+  if(add){
+    add.style.display=pedidoView?'none':'';
+    const yaEsta=!!(currentResult&&currentResult._enPedido);
+    add.disabled=yaEsta;
+    add.textContent=yaEsta?'✓ En el pedido':'+ Agregar al pedido';
+  }
+  const ver=document.getElementById('btn-ver-pedido');
+  if(ver){
+    ver.style.display=(n&&!pedidoView)?'':'none';
+    ver.textContent=`Ver pedido (${n})`;
+  }
+  const banner=document.getElementById('pedido-banner');
+  if(banner){
+    if(!n){banner.style.display='none';banner.innerHTML='';}
+    else{
+      const tot=pedido.items.reduce((s,it)=>s+it.panelTotal,0);
+      banner.style.display='flex';
+      banner.innerHTML=`<span class="pb-txt"><strong>Pedido en curso:</strong> ${pedido.structName} — ${n} configuraci${n>1?'ones':'ón'} · ${tot} paneles</span>`+
+        `<button class="btn btn-primary btn-sm" onclick="verPedido()">Ver pedido</button>`+
+        `<button class="btn btn-outline btn-sm" onclick="vaciarPedido()">Vaciar</button>`;
+    }
+  }
 }
 
 // ===== FICHA DE CONFIGURACIÓN PARA PDF =====
@@ -2587,7 +2828,7 @@ document.getElementById('struct-type-trigger')?.addEventListener('click',toggleS
 buildStructMenu();
 updateStructTriggerDisplay();
 
-function init(){loadPrices();loadPerfil();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();updateStructTriggerDisplay();}
+function init(){loadPedido();refreshPedidoUI();loadPrices();loadPerfil();onStructChange('MPC');updateRefCard('MPC');updatePerfilPreview();calcPlanificador();updateStructTriggerDisplay();}
 init();
 
 // ===== AJUSTE AUTOMÁTICO PARA QUE LA FICHA ENTRE SIEMPRE EN UNA SOLA PÁGINA =====
