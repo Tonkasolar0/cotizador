@@ -544,7 +544,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   </div>
   <div class="inner-page" id="inner-materiales">
     <div class="card" id="pedido-renglones-card" style="display:none">
-      <div class="card-title">Configuraciones del pedido</div>
+      <div class="card-title" id="pedido-renglones-title">Configuraciones del pedido</div>
       <table class="bom-table pedido-table">
         <thead><tr>
           <th>Configuración</th>
@@ -1682,6 +1682,7 @@ function calcular(){
   const navRes=document.getElementById('nav-resultado');
   if(navRes){navRes.disabled=false;navRes.style.opacity='';navRes.style.cursor='';}
     showInner('materiales');
+    renglonIndividual=null;
     renderBOM(bom, isM2V?cantMesas:1);
     prepararNumeracion({usuario:perfil.nombre||'—',estructura:structNames[structType]||structType,paneles:panelTotal,mesas:cantMesas,bom});
     return;
@@ -1831,6 +1832,12 @@ function buildResult(cfg){
   document.getElementById('pdf-footer-vendor').textContent=vendorName;
   document.getElementById('pdf-footer-contact').textContent=contactParts.join(' · ');
 
+  // Renglón de configuración para la cotización individual (mismo bloque que el PDF del pedido)
+  {
+    const mesasInd=parseInt(document.getElementById('cant-mesas')?.value)||1;
+    const totInd=parseInt(currentResult.panelTotal)||0;
+    renglonIndividual={porMesa:mesasInd?Math.round(totInd/mesasInd):totInd,mesas:mesasInd,panelTotal:totInd,cfgDesc:`${cfg.nPatas} patas — ${cfg.desc}`};
+  }
   renderBOM(buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows),parseInt(document.getElementById('cant-mesas')?.value)||1);
   // For PDF: hide layout if too many panels (>40 total)
   const totalPanelsForLayout = structType==='T54' ? panelQty*2 : panelQty;
@@ -2340,13 +2347,28 @@ function setFichaPedido(numTxt){
     `</div>`;
 }
 
+// Configuración de la cotización individual (null en techo/bombeo/MV/2V: no hay configuración elegida)
+let renglonIndividual=null;
+function renderRenglonIndividual(){
+  const tb=document.getElementById('pedido-renglones-body');
+  if(!tb||!renglonIndividual) return;
+  const it=renglonIndividual;
+  tb.innerHTML=`<tr><td style="font-size:13px"><strong>Mesa de ${it.porMesa} paneles</strong>${it.cfgDesc?`<span style="display:block;font-size:11px;color:var(--text-muted)">${it.cfgDesc}</span>`:''}</td>`+
+    `<td style="text-align:center">${it.porMesa}</td><td style="text-align:center">${it.mesas}</td>`+
+    `<td style="text-align:center;font-weight:700">${it.panelTotal}</td><td class="pedido-col-del"></td></tr>`;
+}
+
 function setPedidoView(on){
   pedidoView=on;
   document.body.classList.toggle('pedido-mode',on);
   const bomTable=document.querySelector('#inner-materiales .bom-table:not(.pedido-table)');
   if(bomTable) bomTable.classList.toggle('pedido-mode',on);
   const card=document.getElementById('pedido-renglones-card');
-  if(card) card.style.display=on?'block':'none';
+  const mostrarInd=!on&&!!renglonIndividual;
+  if(mostrarInd) renderRenglonIndividual();
+  if(card) card.style.display=(on||mostrarInd)?'block':'none';
+  const tit=document.getElementById('pedido-renglones-title');
+  if(tit) tit.textContent=on?'Configuraciones del pedido':'Configuración';
   refreshPedidoUI();
 }
 
