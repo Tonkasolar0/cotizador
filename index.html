@@ -888,7 +888,8 @@ function updatePotenciaCampo(){
   const structType=document.getElementById('struct-type').value;
   const isRoof=ROOF_TYPES.has(structType);
   const isM2V=M2V_KIT_TYPES.has(structType);
-  if(isRoof&&!isM2V) return;
+  const isMV=MV_TYPES.has(structType);
+  if(isRoof&&!isM2V&&!isMV) return;
   let total;
   if(isM2V){
     const mesas=parseInt(document.getElementById('cant-mesas')?.value)||1;
@@ -976,8 +977,8 @@ function onStructChange(structType){
   if(roofExtra) roofExtra.style.display=showFilas?'':'none';
   // Potencia campo: hide for all roof except M2V
   const potCampoEl=document.getElementById('field-potencia-campo');
-  if(potCampoEl) potCampoEl.style.display=(isRoof&&!isM2V)?'none':'';
-  if(!isRoof||isM2V) updatePotenciaCampo();
+  if(potCampoEl) potCampoEl.style.display=(isRoof&&!isM2V&&!isMV)?'none':'';
+  if(!isRoof||isM2V||isMV) updatePotenciaCampo();
   if(!isRoof&&!isFix) populateEstacas(structType);
   const hint=document.getElementById('panel-qty-hint');
   if(hint) hint.style.display='none';
@@ -2053,7 +2054,8 @@ function getProjectWatts(){
   if(pedidoView) return pedido.items.reduce((s,it)=>s+(it.watts||0),0);
   const isRoof=currentResult&&currentResult.isRoof;
   const isM2V=currentResult&&M2V_KIT_TYPES.has(currentResult.structType);
-  if(isRoof&&!isM2V){
+  const isMV=currentResult&&MV_TYPES.has(currentResult.structType);
+  if(isRoof&&!isM2V&&!isMV){
     const w=parseInt(document.getElementById('panel-watt').value)||0;
     const total=currentResult?currentResult.panelTotal:0;
     return w*total;
@@ -2432,7 +2434,7 @@ function setFichaForPDF(structType, structName, displayPanels){
   const isTechoFilas=isRoof&&!isBombeo&&!isMV&&!isM2V;
   const mesas=isBombeo?1:isTechoFilas?(parseInt(r.filas)||parseInt(document.getElementById('panel-filas')?.value)||1):(parseInt(document.getElementById('cant-mesas')?.value)||1);
   // Wp por panel: techo/M2V usan panel-watt; campo/MV usan panel-watt-campo
-  const watt=(isRoof&&!isM2V)
+  const watt=(isRoof&&!isM2V&&!isMV)
     ? (parseInt(document.getElementById('panel-watt')?.value)||0)
     : (parseInt(document.getElementById('panel-watt-campo')?.value)||0);
   const numEl=document.getElementById('cotizacion-numero');
