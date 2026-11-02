@@ -17,7 +17,7 @@
               SE2V5677 (M52-2 20p) sin "undefined" · PDF de techo/MV/
               Bombeo/2V con fecha y datos del vendedor · U45 marco
               33mm usa grampa SEC4485 · Nota "IMPORTANTE" de montaje
-              en el pie del PDF
+              en el pie del PDF · PDF achicado ocupa todo el ancho
      ----------------------------------------------------------
      Versión: 4.2
      Fecha:   2026-09-29
@@ -2968,12 +2968,23 @@ function fitPrintToOnePage(){
   // (fecha/título arriba, URL/N° de página abajo), que no podemos detectar ni desactivar
   // desde la página. Más un 3% extra de margen de seguridad general.
   const availableHeightPx=mmToPx(277-15)*0.97;
-  const naturalHeight=el.scrollHeight;
-  if(naturalHeight>availableHeightPx){
-    el.style.zoom=availableHeightPx/naturalHeight;
-  } else {
-    el.style.width='';
+  if(el.scrollHeight<=availableHeightPx){ el.style.width=''; return; }
+  // Al achicar con zoom también se achica el ancho y quedaba un margen blanco a la derecha.
+  // Se compensa armando la página más ancha (190mm / zoom), así al achicarla ocupa los 190mm.
+  // Como al ensancharla el contenido baja de alto, se recalcula un par de veces hasta estabilizar.
+  let z=1;
+  for(let i=0;i<6;i++){
+    el.style.width=(190/z)+'mm';
+    void el.offsetHeight;
+    const nz=Math.min(1,availableHeightPx/el.scrollHeight);
+    if(Math.abs(nz-z)<0.003){ z=nz; break; }
+    z=nz;
   }
+  el.style.width=(190/z)+'mm';
+  void el.offsetHeight;
+  // Seguridad: nunca pasarse del alto disponible
+  z=Math.min(z,availableHeightPx/el.scrollHeight);
+  el.style.zoom=z;
 }
 function resetPrintFit(){
   const el=document.getElementById('page-resultado');
