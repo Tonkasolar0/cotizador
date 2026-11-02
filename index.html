@@ -1917,9 +1917,10 @@ function buildBOM(cfg,structType,panelQty,panelFrame,panelW,rows){
   }
 
   add(RIENDA_BY_STRUCT[structType],2);
-  // Estacas: 1 norte + 1 sur per pata
-  const estacaNorte=currentResult&&currentResult.estacaNorte;
-  const estacaSur=currentResult&&currentResult.estacaSur;
+  // Estacas: 1 norte + 1 sur per pata. Las Fix (MP70F/MP80F) no llevan estacas.
+  const isFixMP=structType==='MP70F'||structType==='MP80F';
+  const estacaNorte=!isFixMP&&currentResult&&currentResult.estacaNorte;
+  const estacaSur=!isFixMP&&currentResult&&currentResult.estacaSur;
   if(estacaNorte)add(estacaNorte,cfg.nPatas);
   if(estacaSur)add(estacaSur,cfg.nPatas);
   // buildBOM devuelve cantidades POR MESA. renderBOM escala por cantidad de mesas.
