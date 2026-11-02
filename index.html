@@ -1653,7 +1653,7 @@ function calcular(){
     const panelTotal=isMV?panelTotalMV:isM2V?panelTotalM2V:panelQtyRaw*filas;
     const estacaNorte=document.getElementById('estaca-norte').value||'';
     const estacaSur=document.getElementById('estaca-sur').value||'';
-    const bom=isMV?buildMvBOM(structType,panelTotalMV,estacaNorte,estacaSur):isBombeo?buildBombeoBOM(structType,estacaNorte,estacaSur):isM2V?buildM2VBOM(structType):buildRoofBOM(structType,panelQtyRaw,filas,parseInt(panelFrame));
+    const bom=isMV?buildMvBOM(structType,panelQtyRaw,cantMesas,estacaNorte,estacaSur):isBombeo?buildBombeoBOM(structType,estacaNorte,estacaSur):isM2V?buildM2VBOM(structType):buildRoofBOM(structType,panelQtyRaw,filas,parseInt(panelFrame));
     const structNames={
       ACANALADA:'Chapa Acanalada Easy Grip',TRAPEZOIDAL:'Chapa Trapezoidal T101',U45:'Techo U45',PLANOR:'Planor 2',
       BOMBEO_1P_D:'SEV5239 — 1V 14 30 D Bombeo 1 panel',BOMBEO_2P_D:'SEV5247 — 1V 14 30 D Bombeo 2 paneles',
@@ -1663,6 +1663,7 @@ function calcular(){
       M42_2V_F:'SE2V5455 — M42 2V 14 30 29 F (18p x 1134)',MT40_2V_F:'SE2V5455T — MT40 2V 14 30 29 F (18p x 1134)',
       M52_2V_F_1303:'SE2V5486 — M52 2V 14 30 33 F (18p x 1303)',M52_2V_F_1134:'SE2V5557 — M52 2V 14 30 33 F (18p x 1134)',
       M52_2V_F_1303_N:'SE2V5641 — M52-2 2V 12 30 33 F (18p x 1303)',M52_2V_F_1134_N:'SE2V5650 — M52-2 2V 12 30 33 F (18p x 1134)',
+      M52_2V_F_1134_N20:'SE2V5677 — M52-2 2V 12 30 33 F (20p x 1134)',
     };
     const structName=structNames[structType];
     const displayPanels=isMV?`${panelTotalMV} panel${panelTotalMV>1?'es':''}`:isM2V?`${panelTotalM2V} paneles (${cantMesas} mesa${cantMesas>1?'s':''})`:`${panelTotal} panel${panelTotal>1?'es':''} (${panelQtyRaw}×${filas})`;
@@ -1949,15 +1950,18 @@ function roofCalcWatt(){
   if(potEl) potEl.textContent = total&&watt ? `${(total*watt/1000).toFixed(2)} kWp` : '—';
 }
 
-function buildMvBOM(structType, panelQty, estacaNorte, estacaSur){
+function buildMvBOM(structType, ppm, mesas, estacaNorte, estacaSur){
+  // ppm = paneles por mesa. Patas compartidas entre paneles vecinos dentro de la mesa,
+  // pero cada mesa es independiente: (ppm+1) patas y 2 riendas por mesa.
   const bom={};
   const add=(c,q)=>{if(q>0)bom[c]=(bom[c]||0)+q;};
   const d=MV_ITEMS[structType];
   if(!d) return bom;
-  const nPatas=panelQty+1;
+  mesas=mesas||1;
+  const nPatas=(ppm+1)*mesas;
   add(d.pata, nPatas);
-  add('SEA3319', panelQty*4);  // 4 morsetas per panel (2 de cada lado)
-  add(d.rienda, 2);
+  add('SEA3319', ppm*mesas*4);  // 4 morsetas por panel (2 de cada lado)
+  add(d.rienda, 2*mesas);
   if(!d.isFix){
     if(estacaNorte) add(estacaNorte, nPatas);
     if(estacaSur)   add(estacaSur,   nPatas);
