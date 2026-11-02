@@ -1674,6 +1674,8 @@ function calcular(){
     document.getElementById('pdf-project-sub').textContent=`${structName} — ${displayPanels}`;
     // Update result subtitle
     document.getElementById('result-sub').textContent=`${structName} — ${displayPanels}`;
+    // Título en pantalla, fecha y datos del vendedor en el PDF (igual que en estructuras a piso)
+    setTituloFechaVendedor(projectName);
     // Hide layout tab for MV, bombeo and M2V
     const tabLayout=document.getElementById('tab-layout');
     if(tabLayout) tabLayout.style.display=(isMV||isBombeo||isM2V)?'none':'';
@@ -1808,6 +1810,19 @@ function confirmarConfig(){
 }
 
 // ===== BUILD RESULT =====
+// Título en pantalla + fecha (encabezado PDF) + vendedor/contacto (pie PDF)
+function setTituloFechaVendedor(projectName){
+  document.getElementById('result-title').textContent=projectName||'Cotización';
+  const dateStr=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('pdf-date-block').innerHTML=`<strong>${dateStr}</strong><span style="display:block;margin-top:2px;font-size:10px;color:#6B7280">${projectName||''}</span>`;
+  const vendorName=perfil.nombre||'Tonka Solar';
+  const contactParts=[];
+  if(perfil.tel)contactParts.push(perfil.tel);
+  if(perfil.mail)contactParts.push(perfil.mail);
+  document.getElementById('pdf-footer-vendor').textContent=vendorName;
+  document.getElementById('pdf-footer-contact').textContent=contactParts.join(' · ');
+}
+
 function buildResult(cfg){
   const{structType,panelQty,panelTotal,panelW,panelH,panelFrame,projectName,rows}=currentResult;
   const structNames={MPC:'MPC 14 30 25 D',T54:'T54 2V 12 30 25 D',MP70:'MP 70 14 30 20 D',MP70F:'MP 70 14 30 20 F',MP80:'MP 80 14 30 20 D',MP80F:'MP 80 14 30 20 F',BOMBEO_1P_D:'SEV5239 — 1V 14 30 D Bombeo 1 panel',BOMBEO_2P_D:'SEV5247 — 1V 14 30 D Bombeo 2 paneles',BOMBEO_1P_F:'SEP5300 — 1V 14 30 F Bombeo 1 panel',BOMBEO_2P_F:'SEP5301 — 1V 14 30 F Bombeo 2 paneles',MV_30D:'1V 14 30 D',MV_40D:'1V 14 40 D',MV_30F:'1V 14 30 F',MV_40F:'1V 14 40 F',MV_50F:'1V 14 50 F'};
